@@ -6,13 +6,18 @@ import MessageBridge from '@/components/common/MessageBridge.vue'
 import { useThemeMode } from '@/composables/useThemeMode'
 import { useWindowSettingsSync } from '@/composables/useWindowSettingsSync'
 import { usePlayerStore } from '@/stores/player'
+import { useUserStore } from '@/stores/user'
 import { naiveThemeOverrides } from '@/theme/naive'
 
 const { naiveTheme } = useThemeMode()
 useWindowSettingsSync()
 
 const player = usePlayerStore()
-onMounted(() => void player.restore())
+const user = useUserStore()
+onMounted(() => {
+  void user.refreshLoginStatus()
+  void player.restore()
+})
 </script>
 
 <template>

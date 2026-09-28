@@ -6,14 +6,28 @@ import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
 
 import { fetchBanners } from '@/api/modules/recommend'
+import { SoundLevel } from '@/constants/player'
 import { type ApiEndpoint, resolveApiEndpoint } from '@/services/tauri/api-endpoint'
 import { useAppStore } from '@/stores/app'
+import { usePlayerStore } from '@/stores/player'
 import { useSettingsStore } from '@/stores/settings'
+import { useUserStore } from '@/stores/user'
 import { currentPlatform, isDesktop } from '@/utils/platform'
 
 const message = useMessage()
 const { themeMode } = storeToRefs(useAppStore())
 const { closeBehavior } = storeToRefs(useSettingsStore())
+const { level } = storeToRefs(usePlayerStore())
+const user = useUserStore()
+const { profile, isLoggedIn, isVip } = storeToRefs(user)
+
+const levelOptions = [
+  { label: '标准', value: SoundLevel.Standard },
+  { label: '较高', value: SoundLevel.Higher },
+  { label: '极高（HQ）', value: SoundLevel.ExHigh },
+  { label: '无损（SQ）', value: SoundLevel.Lossless },
+  { label: 'Hi-Res', value: SoundLevel.HiRes },
+]
 
 const appVersion = ref('-')
 const endpoint = ref<ApiEndpoint | null>(null)
@@ -65,6 +79,30 @@ async function testConnection() {
             {{ opt.label }}
           </n-radio-button>
         </n-radio-group>
+      </n-form-item>
+    </n-card>
+
+    <n-card title="账号" size="small">
+      <div v-if="isLoggedIn && profile" class="flex items-center gap-3">
+        <n-avatar round :size="40" :src="profile.avatarUrl" />
+        <div class="flex-1">
+          <p class="flex items-center gap-2 text-sm">
+            {{ profile.nickname }}
+            <n-tag v-if="isVip" size="tiny" type="primary" :bordered="false">VIP</n-tag>
+          </p>
+          <p class="text-xs text-muted">UID {{ profile.userId }}</p>
+        </div>
+        <n-button size="small" @click="user.logout()">退出登录</n-button>
+      </div>
+      <p v-else class="text-sm text-muted">未登录，点击右上角「未登录」扫码登录</p>
+    </n-card>
+
+    <n-card title="播放" size="small">
+      <n-form-item label="音质" label-placement="left" :show-feedback="false">
+        <div class="flex items-center gap-3">
+          <n-select v-model:value="level" :options="levelOptions" class="w-40!" />
+          <span class="text-xs text-muted">实际音质受账号权限和歌曲版本限制，接口会自动降级</span>
+        </div>
       </n-form-item>
     </n-card>
 

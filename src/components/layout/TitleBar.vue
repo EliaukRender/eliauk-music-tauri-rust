@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 
+import UserEntry from '@/components/user/UserEntry.vue'
 import { RouteName } from '@/constants/route'
 import { useAppStore } from '@/stores/app'
 import { isDesktop, isMacOS } from '@/utils/platform'
@@ -35,6 +36,7 @@ function toggleTheme() {
     <div data-tauri-drag-region class="h-full flex-1" />
 
     <div class="flex items-center gap-1" :class="{ 'pr-4': isMacOS || !isDesktop }">
+      <UserEntry class="mr-2" />
       <n-button quaternary circle size="small" title="切换主题" @click="toggleTheme">
         <template #icon>
           <i-ri-moon-clear-line class="dark:hidden" />
