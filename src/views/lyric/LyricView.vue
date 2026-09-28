@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { onKeyStroke } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 
 import WindowControls from '@/components/layout/WindowControls.vue'
 import LikeButton from '@/components/player/LikeButton.vue'
 import SpectrumCanvas from '@/components/spectrum/SpectrumCanvas.vue'
+import { toggleFullscreen } from '@/services/tauri/window'
+import { useAppStore } from '@/stores/app'
 import { LYRIC_OFFSET_STEP, LyricStatus, useLyricStore } from '@/stores/lyric'
 import { usePlayerStore } from '@/stores/player'
 import { joinArtists } from '@/utils/format'
@@ -18,6 +19,7 @@ const lyric = useLyricStore()
 const { visible, lines, status, offset, showTrans, showRoma, hasTrans, hasRoma } =
   storeToRefs(lyric)
 const { currentSong, isPlaying } = storeToRefs(usePlayerStore())
+const { isFullscreen } = storeToRefs(useAppStore())
 
 const statusText: Partial<Record<LyricStatus, string>> = {
   [LyricStatus.Loading]: '歌词加载中…',
@@ -26,10 +28,6 @@ const statusText: Partial<Record<LyricStatus, string>> = {
   [LyricStatus.Error]: '歌词加载失败',
   [LyricStatus.Idle]: '暂无播放',
 }
-
-onKeyStroke('Escape', () => {
-  if (visible.value) visible.value = false
-})
 
 function formatOffset(value: number) {
   if (!value) return '歌词偏移'
@@ -59,6 +57,15 @@ function formatOffset(value: number) {
           <i-ri-arrow-down-s-line />
         </button>
         <div data-tauri-drag-region class="h-full flex-1" />
+        <button
+          v-if="isDesktop"
+          class="mr-3 flex size-8 items-center justify-center rounded-full text-lg text-white/80 hover:bg-white/10 hover:text-white"
+          :title="isFullscreen ? '退出全屏' : '全屏'"
+          @click="toggleFullscreen()"
+        >
+          <i-ri-fullscreen-exit-line v-if="isFullscreen" />
+          <i-ri-fullscreen-line v-else />
+        </button>
         <WindowControls v-if="isDesktop && !isMacOS" />
       </header>
 

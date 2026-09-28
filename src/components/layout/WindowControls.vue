@@ -1,20 +1,10 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 
-import {
-  closeWindow,
-  minimizeWindow,
-  onMaximizedChange,
-  toggleMaximizeWindow,
-} from '@/services/tauri/window'
+import { closeWindow, minimizeWindow, toggleMaximizeWindow } from '@/services/tauri/window'
+import { useAppStore } from '@/stores/app'
 
-const isMaximized = ref(false)
-let unlisten: (() => void) | undefined
-
-onMounted(async () => {
-  unlisten = await onMaximizedChange((value) => (isMaximized.value = value))
-})
-onBeforeUnmount(() => unlisten?.())
+const { isMaximized } = storeToRefs(useAppStore())
 </script>
 
 <template>

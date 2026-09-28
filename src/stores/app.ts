@@ -12,8 +12,18 @@ export const useAppStore = defineStore(
     const queueDrawerVisible = ref(false)
     /** 需要登录的操作（红心、歌单等）都可以直接唤起 */
     const loginModalVisible = ref(false)
+    /** 由 useWindowState 同步 */
+    const isMaximized = ref(false)
+    const isFullscreen = ref(false)
 
-    return { themeMode, sidebarCollapsed, queueDrawerVisible, loginModalVisible }
+    return {
+      themeMode,
+      sidebarCollapsed,
+      queueDrawerVisible,
+      loginModalVisible,
+      isMaximized,
+      isFullscreen,
+    }
   },
   { persist: { pick: ['themeMode', 'sidebarCollapsed'] } },
 )

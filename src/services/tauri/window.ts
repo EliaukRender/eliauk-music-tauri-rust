@@ -17,12 +17,25 @@ export function closeWindow() {
   return appWindow?.close()
 }
 
-/** 监听最大化状态变化，返回取消监听函数 */
-export async function onMaximizedChange(callback: (maximized: boolean) => void) {
+export async function toggleFullscreen() {
+  if (!appWindow) return
+  await appWindow.setFullscreen(!(await appWindow.isFullscreen()))
+}
+
+export async function exitFullscreen() {
+  if (await appWindow?.isFullscreen()) await appWindow?.setFullscreen(false)
+}
+
+export type WindowState = { maximized: boolean; fullscreen: boolean }
+
+/** 最大化与全屏都会触发 resize，统一在这里读取状态；返回取消监听函数 */
+export async function onWindowStateChange(callback: (state: WindowState) => void) {
   if (!appWindow) return () => {}
   const win = appWindow
-  callback(await win.isMaximized())
-  return win.onResized(async () => callback(await win.isMaximized()))
+  const emit = async () =>
+    callback({ maximized: await win.isMaximized(), fullscreen: await win.isFullscreen() })
+  await emit()
+  return win.onResized(emit)
 }
 
 /** 关闭行为由 Rust 端在 CloseRequested 中执行，前端只负责同步设置 */

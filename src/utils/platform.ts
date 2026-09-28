@@ -14,3 +14,7 @@ export const currentPlatform: AppPlatform = detect()
 export const isMacOS = currentPlatform === 'macos'
 export const isWindows = currentPlatform === 'windows'
 export const isDesktop = currentPlatform !== 'web'
+
+/** 快捷键的 Mod 键：浏览器调试时按 UA 判断 */
+export const usesCommandKey =
+  isMacOS || (currentPlatform === 'web' && /Mac|iPhone|iPad/i.test(navigator.userAgent))

@@ -23,6 +23,8 @@ declare module 'vue' {
     IRiCheckboxMultipleBlankLine: typeof import('~icons/ri/checkbox-multiple-blank-line')['default']
     IRiCloseLine: typeof import('~icons/ri/close-line')['default']
     IRiDeleteBin6Line: typeof import('~icons/ri/delete-bin6-line')['default']
+    IRiFullscreenExitLine: typeof import('~icons/ri/fullscreen-exit-line')['default']
+    IRiFullscreenLine: typeof import('~icons/ri/fullscreen-line')['default']
     IRiHammerLine: typeof import('~icons/ri/hammer-line')['default']
     IRiHeart3Fill: typeof import('~icons/ri/heart3-fill')['default']
     IRiHeart3Line: typeof import('~icons/ri/heart3-line')['default']

@@ -6,13 +6,15 @@ import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
 
 import { fetchBanners } from '@/api/modules/recommend'
+import { appHotkeys } from '@/constants/hotkeys'
 import { SoundLevel } from '@/constants/player'
 import { type ApiEndpoint, resolveApiEndpoint } from '@/services/tauri/api-endpoint'
 import { useAppStore } from '@/stores/app'
 import { usePlayerStore } from '@/stores/player'
 import { useSettingsStore } from '@/stores/settings'
 import { useUserStore } from '@/stores/user'
-import { currentPlatform, isDesktop } from '@/utils/platform'
+import { formatHotkey } from '@/utils/hotkey'
+import { currentPlatform, isDesktop, usesCommandKey } from '@/utils/platform'
 
 const message = useMessage()
 const { themeMode } = storeToRefs(useAppStore())
@@ -104,6 +106,22 @@ async function testConnection() {
           <span class="text-xs text-muted">实际音质受账号权限和歌曲版本限制，接口会自动降级</span>
         </div>
       </n-form-item>
+    </n-card>
+
+    <n-card title="快捷键" size="small">
+      <div class="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+        <div v-for="hotkey in appHotkeys" :key="hotkey.action" class="flex justify-between">
+          <span class="text-muted">{{ hotkey.label }}</span>
+          <kbd class="rounded bg-elevated px-1.5 font-sans text-xs leading-5 ring-1 ring-line">
+            {{
+              formatHotkey(
+                usesCommandKey ? (hotkey.macKeys ?? hotkey.keys) : hotkey.keys,
+                usesCommandKey,
+              )
+            }}
+          </kbd>
+        </div>
+      </div>
     </n-card>
 
     <n-card v-if="isDesktop" title="窗口" size="small">
