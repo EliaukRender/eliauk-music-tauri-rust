@@ -37,18 +37,6 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '歌手', doc: '10-音乐馆.md' },
       },
       {
-        path: 'liked',
-        name: RouteName.LikedSongs,
-        component: PlaceholderView,
-        meta: { title: '我喜欢的音乐', doc: '11-喜欢歌曲.md' },
-      },
-      {
-        path: 'my-playlist',
-        name: RouteName.MyPlaylist,
-        component: PlaceholderView,
-        meta: { title: '我的歌单', doc: '04-歌单.md' },
-      },
-      {
         path: 'settings',
         name: RouteName.Settings,
         component: () => import('@/views/settings/SettingsView.vue'),

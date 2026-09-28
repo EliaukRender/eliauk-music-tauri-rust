@@ -2,10 +2,10 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { fetchPlaylistTracks } from '@/api/modules/playlist'
 import { RouteName } from '@/constants/route'
 import { notify } from '@/services/notify'
 import { usePlayerStore } from '@/stores/player'
+import { usePlaylistStore } from '@/stores/playlist'
 import type { PlaylistSummary } from '@/types/music'
 import { formatPlayCount, resizeImage } from '@/utils/format'
 
@@ -13,13 +13,14 @@ const props = defineProps<{ playlist: PlaylistSummary }>()
 
 const router = useRouter()
 const player = usePlayerStore()
+const playlistStore = usePlaylistStore()
 const loading = ref(false)
 
 async function playAll() {
   if (loading.value) return
   loading.value = true
   try {
-    player.playSongs(await fetchPlaylistTracks(props.playlist.id))
+    player.playSongs((await playlistStore.fetchDetail(props.playlist.id)).songs)
   } catch (error) {
     notify.error(`歌单加载失败：${(error as Error).message}`)
   } finally {

@@ -30,6 +30,13 @@ export type PlaylistSummary = {
   copywriter?: string
 }
 
+/** 网易云歌单的 specialType */
+export const PlaylistSpecialType = {
+  Normal: 0,
+  /** 我喜欢的音乐 */
+  Liked: 5,
+} as const
+
 export type PlaylistDetail = {
   id: number
   name: string
@@ -38,7 +45,20 @@ export type PlaylistDetail = {
   playCount: number
   trackCount: number
   tags: string[]
+  specialType: number
   creator: { userId: number; nickname: string; avatarUrl: string }
+}
+
+/** /user/playlist 中的歌单项 */
+export type UserPlaylist = {
+  id: number
+  name: string
+  coverImgUrl: string
+  trackCount: number
+  creatorId: number
+  /** 10 为隐私歌单 */
+  privacy: number
+  specialType: number
 }
 
 export type Banner = {

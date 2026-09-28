@@ -3,7 +3,12 @@ import PlayerBar from '@/components/layout/PlayerBar.vue'
 import SideMenu from '@/components/layout/SideMenu.vue'
 import TitleBar from '@/components/layout/TitleBar.vue'
 import PlayQueueDrawer from '@/components/player/PlayQueueDrawer.vue'
+import PlaylistEditModal from '@/components/playlist/PlaylistEditModal.vue'
+import LoginModal from '@/components/user/LoginModal.vue'
 import { CONTENT_OVERLAY_ID } from '@/constants/layout'
+import { useAppStore } from '@/stores/app'
+
+const app = useAppStore()
 </script>
 
 <template>
@@ -21,5 +26,7 @@ import { CONTENT_OVERLAY_ID } from '@/constants/layout'
     </div>
     <PlayerBar />
     <PlayQueueDrawer />
+    <LoginModal v-model:show="app.loginModalVisible" />
+    <PlaylistEditModal />
   </div>
 </template>
