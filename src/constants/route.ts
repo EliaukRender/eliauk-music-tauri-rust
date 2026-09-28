@@ -1,5 +1,6 @@
 export const RouteName = {
   Discover: 'discover',
+  Playlist: 'playlist',
   Toplist: 'toplist',
   Artist: 'artist',
   LikedSongs: 'liked-songs',

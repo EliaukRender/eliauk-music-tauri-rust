@@ -1,12 +1,18 @@
 <script setup lang="ts">
 import { dateZhCN, zhCN } from 'naive-ui'
+import { onMounted } from 'vue'
 
+import MessageBridge from '@/components/common/MessageBridge.vue'
 import { useThemeMode } from '@/composables/useThemeMode'
 import { useWindowSettingsSync } from '@/composables/useWindowSettingsSync'
+import { usePlayerStore } from '@/stores/player'
 import { naiveThemeOverrides } from '@/theme/naive'
 
 const { naiveTheme } = useThemeMode()
 useWindowSettingsSync()
+
+const player = usePlayerStore()
+onMounted(() => void player.restore())
 </script>
 
 <template>
@@ -18,9 +24,11 @@ useWindowSettingsSync()
     class="h-full"
   >
     <n-message-provider>
-      <n-dialog-provider>
-        <RouterView />
-      </n-dialog-provider>
+      <MessageBridge>
+        <n-dialog-provider>
+          <RouterView />
+        </n-dialog-provider>
+      </MessageBridge>
     </n-message-provider>
   </n-config-provider>
 </template>

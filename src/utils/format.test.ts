@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatPlayCount, resizeImage } from './format'
+import { formatDuration, formatPlayCount, joinArtists, resizeImage } from './format'
 
 describe('formatPlayCount', () => {
   it.each([
@@ -28,5 +28,25 @@ describe('resizeImage', () => {
 
   it('空地址原样返回', () => {
     expect(resizeImage('', 100)).toBe('')
+  })
+})
+
+describe('formatDuration', () => {
+  it.each([
+    [0, '0:00'],
+    [5.9, '0:05'],
+    [65, '1:05'],
+    [3725, '1:02:05'],
+    [Number.NaN, '0:00'],
+    [-1, '0:00'],
+  ])('%d → %s', (seconds, expected) => {
+    expect(formatDuration(seconds)).toBe(expected)
+  })
+})
+
+describe('joinArtists', () => {
+  it('用斜杠连接歌手名', () => {
+    expect(joinArtists([{ name: 'A' }, { name: 'B' }])).toBe('A / B')
+    expect(joinArtists([])).toBe('')
   })
 })

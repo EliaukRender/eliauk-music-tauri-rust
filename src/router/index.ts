@@ -18,6 +18,13 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '发现音乐' },
       },
       {
+        path: 'playlist/:id(\\d+)',
+        name: RouteName.Playlist,
+        component: () => import('@/views/playlist/PlaylistDetailView.vue'),
+        props: (route) => ({ id: Number(route.params.id) }),
+        meta: { title: '歌单' },
+      },
+      {
         path: 'toplist',
         name: RouteName.Toplist,
         component: PlaceholderView,
