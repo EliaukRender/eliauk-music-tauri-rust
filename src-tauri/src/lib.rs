@@ -1,5 +1,7 @@
 mod api_server;
 mod events;
+mod media_controls;
+mod player_sync;
 mod shortcuts;
 mod tray;
 mod window;
@@ -50,7 +52,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             api_server::get_api_endpoint,
             window::set_close_behavior,
-            tray::sync_player_state,
+            player_sync::sync_player_state,
             shortcuts::set_global_shortcuts
         ])
         .setup(|app| {
@@ -58,6 +60,7 @@ pub fn run() {
             api_server::init(app.handle());
 
             tray::init(app.handle())?;
+            media_controls::init(app.handle());
             Ok(())
         })
         .on_window_event(|window, event| {

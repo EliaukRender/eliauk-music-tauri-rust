@@ -12,7 +12,8 @@
         "center": true,
         "decorations": false,
         "shadow": true,
-        "dragDropEnabled": false
+        "dragDropEnabled": false,
+        "additionalBrowserArgs": "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection,HardwareMediaKeyHandling"
       }
     ]
   },

@@ -1,14 +1,14 @@
 use std::sync::Mutex;
 
-use serde::Deserialize;
 use tauri::image::Image;
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
 #[cfg(not(target_os = "macos"))]
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconEvent};
-use tauri::{AppHandle, Emitter, Manager, State, Wry};
+use tauri::{AppHandle, Emitter, Manager, Wry};
 
 use crate::events::{PlayerCommand, PLAYER_COMMAND};
+use crate::player_sync::PlayerSnapshot;
 use crate::window::{show_main_window, MAIN_WINDOW};
 
 const TRAY_ID: &str = "main-tray";
@@ -23,20 +23,11 @@ const APP_NAME: &str = "Eliauk 音乐";
 /// 菜单项过长会把托盘菜单撑得很宽
 const MAX_LABEL_CHARS: usize = 28;
 
-/// 前端推送的播放状态，见 src/services/tauri/system-bridge.ts
-#[derive(Debug, Clone, Default, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TrayPlayerState {
-    pub title: Option<String>,
-    pub artist: Option<String>,
-    pub is_playing: bool,
-}
-
 /// 需要动态更新文案的菜单项句柄
 pub struct TrayMenuHandles {
     now_playing: MenuItem<Wry>,
     toggle: MenuItem<Wry>,
-    state: Mutex<TrayPlayerState>,
+    state: Mutex<PlayerSnapshot>,
 }
 
 fn truncate(text: &str) -> String {
@@ -47,7 +38,7 @@ fn truncate(text: &str) -> String {
     format!("{head}…")
 }
 
-pub fn now_playing_label(state: &TrayPlayerState) -> String {
+pub fn now_playing_label(state: &PlayerSnapshot) -> String {
     match (&state.title, &state.artist) {
         (Some(title), Some(artist)) if !artist.is_empty() => {
             truncate(&format!("{title} - {artist}"))
@@ -57,7 +48,7 @@ pub fn now_playing_label(state: &TrayPlayerState) -> String {
     }
 }
 
-pub fn toggle_label(state: &TrayPlayerState) -> &'static str {
+pub fn toggle_label(state: &PlayerSnapshot) -> &'static str {
     if state.is_playing {
         "暂停"
     } else {
@@ -72,7 +63,7 @@ fn send_command(app: &AppHandle, command: PlayerCommand) {
 }
 
 pub fn init(app: &AppHandle) -> tauri::Result<()> {
-    let initial = TrayPlayerState::default();
+    let initial = PlayerSnapshot::default();
     let now_playing = MenuItem::with_id(
         app,
         MENU_NOW_PLAYING,
@@ -145,15 +136,13 @@ pub fn init(app: &AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
-/// 前端在歌曲或播放状态变化时调用，只更新变化的部分
-#[tauri::command]
-pub fn sync_player_state(
-    app: AppHandle,
-    state: TrayPlayerState,
-    handles: State<'_, TrayMenuHandles>,
-) -> Result<(), String> {
+/// 只更新变化的部分
+pub fn update(app: &AppHandle, state: &PlayerSnapshot) -> Result<(), String> {
+    let Some(handles) = app.try_state::<TrayMenuHandles>() else {
+        return Ok(());
+    };
     let mut current = handles.state.lock().map_err(|e| e.to_string())?;
-    let label = now_playing_label(&state);
+    let label = now_playing_label(state);
     if label != now_playing_label(&current) {
         handles
             .now_playing
@@ -171,10 +160,10 @@ pub fn sync_player_state(
     if state.is_playing != current.is_playing {
         handles
             .toggle
-            .set_text(toggle_label(&state))
+            .set_text(toggle_label(state))
             .map_err(|e| e.to_string())?;
     }
-    *current = state;
+    *current = state.clone();
     Ok(())
 }
 
@@ -182,11 +171,11 @@ pub fn sync_player_state(
 mod tests {
     use super::*;
 
-    fn state(title: Option<&str>, artist: Option<&str>) -> TrayPlayerState {
-        TrayPlayerState {
+    fn state(title: Option<&str>, artist: Option<&str>) -> PlayerSnapshot {
+        PlayerSnapshot {
             title: title.map(Into::into),
             artist: artist.map(Into::into),
-            is_playing: false,
+            ..Default::default()
         }
     }
 
@@ -212,10 +201,12 @@ mod tests {
     }
 
     #[test]
-    fn deserializes_frontend_payload() {
-        let parsed: TrayPlayerState =
-            serde_json::from_str(r#"{"title":"a","artist":null,"isPlaying":true}"#).unwrap();
-        assert!(parsed.is_playing);
-        assert_eq!(toggle_label(&parsed), "暂停");
+    fn toggle_label_follows_playing_state() {
+        let playing = PlayerSnapshot {
+            is_playing: true,
+            ..Default::default()
+        };
+        assert_eq!(toggle_label(&playing), "暂停");
+        assert_eq!(toggle_label(&PlayerSnapshot::default()), "播放");
     }
 }
