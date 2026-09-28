@@ -75,3 +75,14 @@ export type SongUrl = {
   /** 试听片段在原曲中的区间（秒）；此时 url 只包含该片段 */
   trial: { start: number; end: number } | null
 }
+
+export type Toplist = {
+  id: number
+  name: string
+  coverImgUrl: string
+  updateFrequency: string
+  playCount: number
+  /** 官方榜自带的前几首预览 */
+  preview: { name: string; artist: string }[]
+  official: boolean
+}

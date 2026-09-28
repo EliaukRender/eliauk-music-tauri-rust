@@ -1,32 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { usePlaylistPlayback } from '@/composables/usePlaylistPlayback'
 import { RouteName } from '@/constants/route'
-import { notify } from '@/services/notify'
-import { usePlayerStore } from '@/stores/player'
-import { usePlaylistStore } from '@/stores/playlist'
 import type { PlaylistSummary } from '@/types/music'
 import { formatPlayCount, resizeImage } from '@/utils/format'
 
-const props = defineProps<{ playlist: PlaylistSummary }>()
+const props = defineProps<{
+  playlist: Pick<PlaylistSummary, 'id' | 'name' | 'picUrl' | 'playCount'>
+  /** 标题下方的补充信息，如榜单更新频率 */
+  subtitle?: string
+}>()
 
 const router = useRouter()
-const player = usePlayerStore()
-const playlistStore = usePlaylistStore()
-const loading = ref(false)
-
-async function playAll() {
-  if (loading.value) return
-  loading.value = true
-  try {
-    player.playSongs((await playlistStore.fetchDetail(props.playlist.id)).songs)
-  } catch (error) {
-    notify.error(`歌单加载失败：${(error as Error).message}`)
-  } finally {
-    loading.value = false
-  }
-}
+const { loading, playAll } = usePlaylistPlayback(() => props.playlist.id)
 </script>
 
 <template>
@@ -43,6 +30,7 @@ async function playAll() {
         class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
       />
       <span
+        v-if="playlist.playCount"
         class="absolute top-2 right-2 flex items-center gap-0.5 rounded-full bg-black/40 px-2 py-0.5 text-xs text-white backdrop-blur"
       >
         <i-ri-play-fill class="text-[11px]" />
@@ -59,5 +47,6 @@ async function playAll() {
       </button>
     </div>
     <p class="mt-2 line-clamp-2 text-sm leading-snug">{{ playlist.name }}</p>
+    <p v-if="subtitle" class="mt-0.5 text-xs text-muted">{{ subtitle }}</p>
   </div>
 </template>

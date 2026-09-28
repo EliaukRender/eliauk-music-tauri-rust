@@ -27,8 +27,8 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'toplist',
         name: RouteName.Toplist,
-        component: PlaceholderView,
-        meta: { title: '排行榜', doc: '10-音乐馆.md' },
+        component: () => import('@/views/toplist/ToplistView.vue'),
+        meta: { title: '排行榜' },
       },
       {
         path: 'artist',
