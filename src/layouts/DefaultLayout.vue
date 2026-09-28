@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ContextMenuHost from '@/components/common/ContextMenuHost.vue'
 import PlayerBar from '@/components/layout/PlayerBar.vue'
 import SideMenu from '@/components/layout/SideMenu.vue'
 import TitleBar from '@/components/layout/TitleBar.vue'
@@ -28,5 +29,6 @@ const app = useAppStore()
     <PlayQueueDrawer />
     <LoginModal v-model:show="app.loginModalVisible" />
     <PlaylistEditModal />
+    <ContextMenuHost />
   </div>
 </template>

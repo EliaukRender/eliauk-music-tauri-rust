@@ -3,16 +3,24 @@ import { storeToRefs } from 'pinia'
 
 import LikeButton from '@/components/player/LikeButton.vue'
 import { PlayStatus } from '@/constants/player'
+import { useSongMenu } from '@/features/context-menus'
 import { usePlayerStore } from '@/stores/player'
 import type { Song } from '@/types/music'
 import { formatDuration, joinArtists } from '@/utils/format'
 
-const props = withDefaults(defineProps<{ songs: Song[]; loading?: boolean }>(), {
-  loading: false,
-})
+const props = withDefaults(
+  defineProps<{
+    songs: Song[]
+    loading?: boolean
+    /** 所在歌单，用于右键菜单判断能否移除 */
+    playlistId?: number
+  }>(),
+  { loading: false, playlistId: undefined },
+)
 
 const player = usePlayerStore()
 const { currentId, status } = storeToRefs(player)
+const songMenu = useSongMenu()
 
 function play(song: Song) {
   player.playSongs(props.songs, song.id)
@@ -50,6 +58,7 @@ function play(song: Song) {
       }"
       :title="song.unavailable ? '暂无版权' : undefined"
       @dblclick="play(song)"
+      @contextmenu="songMenu.open($event, song, songs, playlistId)"
     >
       <span class="flex justify-center text-xs text-muted tabular-nums">
         <template v-if="song.id === currentId">

@@ -5,15 +5,22 @@ import { useRoute, useRouter } from 'vue-router'
 import { RouteName } from '@/constants/route'
 import { notify } from '@/services/notify'
 import { usePlaylistStore } from '@/stores/playlist'
+import type { Song } from '@/types/music'
 
 type EditorState = {
   visible: boolean
   /** 为 null 时是新建 */
   target: { id: number; name: string } | null
+  /** 新建成功后要加入的歌曲（右键「添加到歌单 > 新建歌单」） */
+  songsToAdd: Song[]
 }
 
 /** 模块级共享：弹窗只挂载一份（DefaultLayout），任何位置都可以打开 */
-export const playlistEditor = reactive<EditorState>({ visible: false, target: null })
+export const playlistEditor = reactive<EditorState>({
+  visible: false,
+  target: null,
+  songsToAdd: [],
+})
 
 export function usePlaylistActions() {
   const dialog = useDialog()
@@ -21,13 +28,15 @@ export function usePlaylistActions() {
   const router = useRouter()
   const store = usePlaylistStore()
 
-  function openCreate() {
+  function openCreate(songsToAdd: Song[] = []) {
     playlistEditor.target = null
+    playlistEditor.songsToAdd = songsToAdd
     playlistEditor.visible = true
   }
 
   function openRename(playlist: { id: number; name: string }) {
     playlistEditor.target = { id: playlist.id, name: playlist.name }
+    playlistEditor.songsToAdd = []
     playlistEditor.visible = true
   }
 

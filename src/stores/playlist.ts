@@ -97,8 +97,9 @@ export const usePlaylistStore = defineStore('playlist', () => {
   }
 
   async function create(name: string, privacy = false) {
-    await createPlaylist(name, privacy)
+    const id = await createPlaylist(name, privacy)
     await fetchMine()
+    return id
   }
 
   async function remove(id: number) {

@@ -6,6 +6,7 @@ import PlaylistMenuItem from '@/components/playlist/PlaylistMenuItem.vue'
 import { usePlaylistActions } from '@/composables/usePlaylistActions'
 import { sideMenuGroups } from '@/constants/menu'
 import { RouteName } from '@/constants/route'
+import { usePlaylistMenu } from '@/features/context-menus'
 import { useAppStore } from '@/stores/app'
 import { usePlaylistStore } from '@/stores/playlist'
 import { useUserStore } from '@/stores/user'
@@ -15,6 +16,7 @@ const app = useAppStore()
 const { isLoggedIn } = storeToRefs(useUserStore())
 const { likedPlaylist, created, subscribed, mineLoading } = storeToRefs(usePlaylistStore())
 const { openCreate } = usePlaylistActions()
+const playlistMenu = usePlaylistMenu()
 
 const itemClass = (active: boolean) =>
   active
@@ -67,6 +69,7 @@ const itemClass = (active: boolean) =>
             class="flex h-9 items-center gap-2.5 rounded-lg px-3 text-sm transition-colors"
             :class="itemClass(isActive)"
             @click="navigate"
+            @contextmenu="playlistMenu.open($event, likedPlaylist)"
           >
             <i-ri-heart-3-line class="text-[17px]" />
             我喜欢的音乐
@@ -87,7 +90,7 @@ const itemClass = (active: boolean) =>
         <section class="mt-3">
           <h3 class="flex items-center justify-between px-3 pb-1.5 text-xs text-muted">
             创建的歌单
-            <button class="hover:text-fg" title="新建歌单" @click="openCreate">
+            <button class="hover:text-fg" title="新建歌单" @click="openCreate()">
               <i-ri-add-line class="text-sm" />
             </button>
           </h3>

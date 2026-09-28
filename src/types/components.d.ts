@@ -12,6 +12,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppLogo: typeof import('./../components/common/AppLogo.vue')['default']
+    ContextMenuHost: typeof import('./../components/common/ContextMenuHost.vue')['default']
     IRiAddLine: typeof import('~icons/ri/add-line')['default']
     IRiArrowLeftSLine: typeof import('~icons/ri/arrow-left-s-line')['default']
     IRiArrowRightSLine: typeof import('~icons/ri/arrow-right-s-line')['default']

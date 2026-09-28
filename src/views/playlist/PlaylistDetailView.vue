@@ -59,6 +59,11 @@ watch(
   () => void load(),
   { immediate: true },
 )
+
+// 添加歌曲、喜欢等操作会让缓存失效，停留在当前页时自动重新拉取
+watch(entry, (value) => {
+  if (!value && !loading.value && !error.value) void load()
+})
 </script>
 
 <template>
@@ -135,7 +140,7 @@ watch(
         </div>
       </header>
 
-      <SongList :songs="entry?.songs ?? []" :loading="loading && !entry" />
+      <SongList :songs="entry?.songs ?? []" :loading="loading && !entry" :playlist-id="id" />
     </template>
   </div>
 </template>

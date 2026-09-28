@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { RouteName } from '@/constants/route'
+import { usePlaylistMenu } from '@/features/context-menus'
+import type { UserPlaylist } from '@/types/music'
 import { resizeImage } from '@/utils/format'
 
-defineProps<{ playlist: { id: number; name: string; coverImgUrl: string } }>()
+defineProps<{ playlist: UserPlaylist }>()
+
+const menu = usePlaylistMenu()
 </script>
 
 <template>
@@ -22,6 +26,7 @@ defineProps<{ playlist: { id: number; name: string; coverImgUrl: string } }>()
       "
       :title="playlist.name"
       @click="navigate"
+      @contextmenu="menu.open($event, playlist)"
     >
       <img
         :src="resizeImage(playlist.coverImgUrl, 40)"

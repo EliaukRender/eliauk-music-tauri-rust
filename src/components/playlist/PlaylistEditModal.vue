@@ -31,8 +31,13 @@ async function submit() {
       await store.rename(playlistEditor.target.id, trimmed.value)
       notify.success('已重命名')
     } else {
-      await store.create(trimmed.value, privacy.value)
-      notify.success('已新建歌单')
+      const id = await store.create(trimmed.value, privacy.value)
+      if (playlistEditor.songsToAdd.length) {
+        await store.addSongs(id, playlistEditor.songsToAdd)
+        notify.success('已新建歌单并添加歌曲')
+      } else {
+        notify.success('已新建歌单')
+      }
     }
     playlistEditor.visible = false
   } catch (error) {

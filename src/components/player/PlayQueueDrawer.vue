@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { useTemplateRef } from 'vue'
 
 import { CONTENT_OVERLAY_ID } from '@/constants/layout'
+import { useQueueMenu } from '@/features/context-menus'
 import { useAppStore } from '@/stores/app'
 import { usePlayerStore } from '@/stores/player'
 
@@ -14,6 +15,8 @@ const ITEM_HEIGHT = 56
 const { queueDrawerVisible } = storeToRefs(useAppStore())
 const player = usePlayerStore()
 const { queue, currentId, currentIndex, isPlaying } = storeToRefs(player)
+
+const queueMenu = useQueueMenu()
 
 const listRef = useTemplateRef<VirtualListInst>('list')
 const wrapperRef = useTemplateRef<HTMLElement>('wrapper')
@@ -77,6 +80,7 @@ function scrollToCurrent() {
                 :playing="isPlaying"
                 @play="player.playSong(item)"
                 @remove="player.removeFromQueue(item.id)"
+                @contextmenu="queueMenu.open($event, item)"
               />
             </div>
           </template>
