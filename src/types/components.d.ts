@@ -97,6 +97,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     ShortcutRecorder: typeof import('./../components/common/ShortcutRecorder.vue')['default']
     SideMenu: typeof import('./../components/layout/SideMenu.vue')['default']
+    SongCard: typeof import('./../components/song/SongCard.vue')['default']
     SongList: typeof import('./../components/song/SongList.vue')['default']
     SpectrumCanvas: typeof import('./../components/spectrum/SpectrumCanvas.vue')['default']
     SpectrumEntryButton: typeof import('./../components/spectrum/SpectrumEntryButton.vue')['default']
