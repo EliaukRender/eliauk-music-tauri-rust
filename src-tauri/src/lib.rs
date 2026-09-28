@@ -1,4 +1,5 @@
 mod api_server;
+mod events;
 mod tray;
 mod window;
 
@@ -45,7 +46,8 @@ pub fn run() {
         .manage(WindowSettings::default())
         .invoke_handler(tauri::generate_handler![
             api_server::get_api_endpoint,
-            window::set_close_behavior
+            window::set_close_behavior,
+            tray::sync_player_state
         ])
         .setup(|app| {
             #[cfg(feature = "embedded-api")]

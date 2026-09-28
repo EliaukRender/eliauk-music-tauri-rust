@@ -7,6 +7,7 @@ import PlayQueueDrawer from '@/components/player/PlayQueueDrawer.vue'
 import PlaylistEditModal from '@/components/playlist/PlaylistEditModal.vue'
 import LoginModal from '@/components/user/LoginModal.vue'
 import { useHotkeys } from '@/composables/useHotkeys'
+import { useSystemBridge } from '@/composables/useSystemBridge'
 import { useWindowState } from '@/composables/useWindowState'
 import { CONTENT_OVERLAY_ID } from '@/constants/layout'
 import { useAppStore } from '@/stores/app'
@@ -15,6 +16,7 @@ import LyricView from '@/views/lyric/LyricView.vue'
 const app = useAppStore()
 useWindowState()
 useHotkeys()
+useSystemBridge()
 </script>
 
 <template>
