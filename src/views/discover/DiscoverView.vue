@@ -10,7 +10,7 @@ import {
   fetchNewSongs,
   fetchRecommendPlaylists,
 } from '@/api/modules/recommend'
-import PlaylistCard from '@/components/common/PlaylistCard.vue'
+import PlaylistCard from '@/components/playlist/PlaylistCard.vue'
 import SongCard from '@/components/song/SongCard.vue'
 import { useHorizontalWheel } from '@/composables/useHorizontalWheel'
 import { useUserStore } from '@/stores/user'

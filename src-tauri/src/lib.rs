@@ -1,13 +1,7 @@
 mod api_server;
 mod credential;
 mod events;
-#[cfg(target_os = "macos")]
-mod macos;
-mod media_controls;
-mod mini_window;
-mod player_sync;
-mod shortcuts;
-mod tray;
+mod system;
 mod window;
 
 use tauri::{Manager, RunEvent, WindowEvent};
@@ -41,11 +35,11 @@ pub fn run() {
             // 不恢复可见性：macOS 隐藏到 Dock 后退出，下次启动不应保持隐藏
             tauri_plugin_window_state::Builder::new()
                 .with_state_flags(StateFlags::all() & !StateFlags::VISIBLE)
-                // mini 窗口尺寸由折叠状态决定，创建后只恢复位置（见 mini_window.rs）
-                .skip_initial_state(mini_window::MINI_WINDOW)
+                // mini 窗口尺寸由折叠状态决定，创建后只恢复位置（见 window/mini.rs）
+                .skip_initial_state(window::mini::MINI_WINDOW)
                 .build(),
         )
-        .plugin(shortcuts::plugin())
+        .plugin(system::shortcuts::plugin())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init());
 
@@ -54,25 +48,25 @@ pub fn run() {
 
     let app = builder
         .manage(WindowSettings::default())
-        .manage(shortcuts::ShortcutRegistry::default())
+        .manage(system::shortcuts::ShortcutRegistry::default())
         .invoke_handler(tauri::generate_handler![
             api_server::get_api_endpoint,
             window::set_close_behavior,
             window::focus_main_window,
-            player_sync::sync_player_state,
-            shortcuts::set_global_shortcuts,
-            mini_window::toggle_mini_player,
+            system::player_sync::sync_player_state,
+            system::shortcuts::set_global_shortcuts,
+            window::mini::toggle_mini_player,
             credential::load_credential,
             credential::save_credential,
             credential::clear_credential,
-            mini_window::resize_mini_player
+            window::mini::resize_mini_player
         ])
         .setup(|app| {
             #[cfg(feature = "embedded-api")]
             api_server::init(app.handle());
 
-            tray::init(app.handle())?;
-            media_controls::init(app.handle());
+            system::tray::init(app.handle())?;
+            system::media_controls::init(app.handle());
             Ok(())
         })
         .on_window_event(|window, event| {

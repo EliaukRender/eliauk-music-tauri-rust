@@ -4,9 +4,9 @@ import { computed, ref, watch } from 'vue'
 
 import SongList from '@/components/song/SongList.vue'
 import { usePlaylistActions } from '@/composables/usePlaylistActions'
+import { PlaylistSpecialType } from '@/constants/playlist'
 import { usePlayerStore } from '@/stores/player'
 import { usePlaylistStore } from '@/stores/playlist'
-import { PlaylistSpecialType } from '@/types/music'
 import { formatPlayCount, resizeImage } from '@/utils/format'
 
 const props = defineProps<{ id: number }>()

@@ -2,10 +2,10 @@
 import { useIntersectionObserver } from '@vueuse/core'
 import { useTemplateRef } from 'vue'
 
+import ArtistCard from '@/components/artist/ArtistCard.vue'
 import { useArtistList } from '@/composables/useArtistList'
 import { artistAreaOptions, artistInitialOptions, artistTypeOptions } from '@/constants/artist'
 
-import ArtistCard from './components/ArtistCard.vue'
 import FilterRow from './components/FilterRow.vue'
 
 defineOptions({ name: 'ArtistsView' })

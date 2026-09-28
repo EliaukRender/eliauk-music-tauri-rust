@@ -3,7 +3,7 @@ import './assets/styles/main.css'
 import { createApp } from 'vue'
 
 import { WindowLabel } from './constants/events'
-import { currentWindowLabel } from './services/tauri/mini'
+import { currentWindowLabel } from './services/tauri/events'
 import { pinia } from './stores'
 
 // 生产环境屏蔽 WebView 默认菜单（检查元素、重新加载），输入框保留剪切/复制/粘贴

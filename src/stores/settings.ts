@@ -3,7 +3,7 @@ import { ref } from 'vue'
 
 import { defaultGlobalShortcuts, type GlobalAction } from '@/constants/hotkeys'
 
-/** 与 src-tauri/src/window.rs 中的 CloseBehavior 保持一致 */
+/** 与 src-tauri/src/window/mod.rs 中的 CloseBehavior 保持一致 */
 export type CloseBehavior = 'minimize' | 'exit'
 
 export const useSettingsStore = defineStore(

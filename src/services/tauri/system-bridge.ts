@@ -1,9 +1,10 @@
 import { invoke, isTauri } from '@tauri-apps/api/core'
-import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 
 import { AppEvent, type PlayerCommand } from '@/constants/events'
 
-/** 与 src-tauri/src/player_sync.rs 的 PlayerSnapshot 保持一致 */
+import { listenCurrent } from './events'
+
+/** 与 src-tauri/src/system/player_sync.rs 的 PlayerSnapshot 保持一致 */
 export type PlayerSnapshot = {
   title: string | null
   artist: string | null
@@ -16,12 +17,9 @@ export type PlayerSnapshot = {
   isPlaying: boolean
 }
 
-/** 只接收发给当前窗口的指令；返回取消监听函数 */
-export async function onPlayerCommand(handler: (command: PlayerCommand) => void) {
-  if (!isTauri()) return () => {}
-  return getCurrentWebviewWindow().listen<PlayerCommand>(AppEvent.PlayerCommand, (event) =>
-    handler(event.payload),
-  )
+/** 返回取消监听函数 */
+export function onPlayerCommand(handler: (command: PlayerCommand) => void) {
+  return listenCurrent(AppEvent.PlayerCommand, handler)
 }
 
 /** 同步到托盘与系统媒体中心 */

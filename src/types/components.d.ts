@@ -12,6 +12,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppLogo: typeof import('./../components/common/AppLogo.vue')['default']
+    ArtistCard: typeof import('./../components/artist/ArtistCard.vue')['default']
     ContextMenuHost: typeof import('./../components/common/ContextMenuHost.vue')['default']
     IRiAddLine: typeof import('~icons/ri/add-line')['default']
     IRiArrowDownSLine: typeof import('~icons/ri/arrow-down-s-line')['default']
@@ -88,7 +89,7 @@ declare module 'vue' {
     NVirtualList: typeof import('naive-ui')['NVirtualList']
     PlayControls: typeof import('./../components/player/PlayControls.vue')['default']
     PlayerBar: typeof import('./../components/layout/PlayerBar.vue')['default']
-    PlaylistCard: typeof import('./../components/common/PlaylistCard.vue')['default']
+    PlaylistCard: typeof import('./../components/playlist/PlaylistCard.vue')['default']
     PlaylistEditModal: typeof import('./../components/playlist/PlaylistEditModal.vue')['default']
     PlaylistMenuItem: typeof import('./../components/playlist/PlaylistMenuItem.vue')['default']
     PlayQueueDrawer: typeof import('./../components/player/PlayQueueDrawer.vue')['default']

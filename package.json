@@ -23,7 +23,7 @@
     "test:rust": "cargo test --manifest-path src-tauri/Cargo.toml --all-features",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "lint:rust": "cargo fmt --manifest-path src-tauri/Cargo.toml --check && cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets --all-features -- -D warnings",
+    "lint:rust": "node scripts/check-rust-size.mjs && cargo fmt --manifest-path src-tauri/Cargo.toml --check && cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets --all-features -- -D warnings",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"

@@ -2,7 +2,8 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 import { AppEvent, type PlayerCommand } from '@/constants/events'
-import { listenCurrent, notifyMiniReady, sendToMain } from '@/services/tauri/mini'
+import { listenCurrent } from '@/services/tauri/events'
+import { notifyMiniReady, sendToMain } from '@/services/tauri/mini'
 import type { MiniPlayerState, MiniSong } from '@/types/mini'
 
 /** mini 窗口的只读镜像，不持久化；所有操作以指令形式转发给主窗口 */

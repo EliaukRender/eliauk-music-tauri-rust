@@ -6,7 +6,7 @@ import LikeButton from '@/components/player/LikeButton.vue'
 import SpectrumCanvas from '@/components/spectrum/SpectrumCanvas.vue'
 import { toggleFullscreen } from '@/services/tauri/window'
 import { useAppStore } from '@/stores/app'
-import { LYRIC_OFFSET_STEP, LyricStatus, useLyricStore } from '@/stores/lyric'
+import { LyricStatus, useLyricStore } from '@/stores/lyric'
 import { usePlayerStore } from '@/stores/player'
 import { joinArtists } from '@/utils/format'
 import { isDesktop, isMacOS } from '@/utils/platform'
@@ -14,10 +14,10 @@ import { isDesktop, isMacOS } from '@/utils/platform'
 import JukeBox from './components/JukeBox.vue'
 import LyricBackground from './components/LyricBackground.vue'
 import LyricScroller from './components/LyricScroller.vue'
+import LyricToolbar from './components/LyricToolbar.vue'
 
 const lyric = useLyricStore()
-const { visible, lines, status, offset, showTrans, showRoma, hasTrans, hasRoma } =
-  storeToRefs(lyric)
+const { visible, lines, status, offset, showTrans, showRoma } = storeToRefs(lyric)
 const { currentSong, isPlaying } = storeToRefs(usePlayerStore())
 const { isFullscreen } = storeToRefs(useAppStore())
 
@@ -27,11 +27,6 @@ const statusText: Partial<Record<LyricStatus, string>> = {
   [LyricStatus.Pure]: '纯音乐，请欣赏',
   [LyricStatus.Error]: '歌词加载失败',
   [LyricStatus.Idle]: '暂无播放',
-}
-
-function formatOffset(value: number) {
-  if (!value) return '歌词偏移'
-  return `${value > 0 ? '提前' : '延后'} ${Math.abs(value).toFixed(1)}s`
 }
 </script>
 
@@ -100,50 +95,7 @@ function formatOffset(value: number) {
             {{ statusText[status] }}
           </div>
 
-          <div
-            v-if="status === LyricStatus.Ready"
-            class="flex shrink-0 items-center gap-2 pt-3 text-xs text-white/70"
-          >
-            <button
-              v-if="hasTrans"
-              class="lyric-chip"
-              :class="{ 'is-on': showTrans }"
-              @click="showTrans = !showTrans"
-            >
-              译
-            </button>
-            <button
-              v-if="hasRoma"
-              class="lyric-chip"
-              :class="{ 'is-on': showRoma }"
-              @click="showRoma = !showRoma"
-            >
-              音
-            </button>
-            <div class="ml-auto flex items-center gap-1">
-              <button
-                class="lyric-chip"
-                title="歌词延后"
-                @click="lyric.adjustOffset(-LYRIC_OFFSET_STEP)"
-              >
-                <i-ri-subtract-line />
-              </button>
-              <button
-                class="min-w-20 rounded-full px-2 py-1 text-center hover:bg-white/10"
-                title="点击重置"
-                @click="lyric.resetOffset()"
-              >
-                {{ formatOffset(offset) }}
-              </button>
-              <button
-                class="lyric-chip"
-                title="歌词提前"
-                @click="lyric.adjustOffset(LYRIC_OFFSET_STEP)"
-              >
-                <i-ri-add-line />
-              </button>
-            </div>
-          </div>
+          <LyricToolbar v-if="status === LyricStatus.Ready" class="shrink-0 pt-3" />
         </div>
       </div>
     </section>
@@ -151,16 +103,6 @@ function formatOffset(value: number) {
 </template>
 
 <style scoped>
-@reference '@/assets/styles/main.css';
-
-.lyric-chip {
-  @apply flex size-7 items-center justify-center rounded-full border border-white/20 hover:bg-white/10;
-}
-
-.lyric-chip.is-on {
-  @apply border-white/60 bg-white/15 text-white;
-}
-
 .lyric-slide-enter-active,
 .lyric-slide-leave-active {
   transition:

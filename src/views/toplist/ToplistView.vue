@@ -3,7 +3,7 @@ import { useAsyncState } from '@vueuse/core'
 import { computed } from 'vue'
 
 import { fetchToplists } from '@/api/modules/toplist'
-import PlaylistCard from '@/components/common/PlaylistCard.vue'
+import PlaylistCard from '@/components/playlist/PlaylistCard.vue'
 
 import OfficialToplistCard from './components/OfficialToplistCard.vue'
 

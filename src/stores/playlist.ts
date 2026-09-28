@@ -10,12 +10,8 @@ import {
   renamePlaylist,
   updatePlaylistTracks,
 } from '@/api/modules/playlist'
-import {
-  type PlaylistDetail,
-  PlaylistSpecialType,
-  type Song,
-  type UserPlaylist,
-} from '@/types/music'
+import { PlaylistSpecialType } from '@/constants/playlist'
+import type { PlaylistDetail, Song, UserPlaylist } from '@/types/music'
 
 import { useUserStore } from './user'
 

@@ -4,12 +4,12 @@ import { computed, useTemplateRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { searchArtists, searchPlaylists, searchSongs } from '@/api/modules/search'
-import PlaylistCard from '@/components/common/PlaylistCard.vue'
+import ArtistCard from '@/components/artist/ArtistCard.vue'
+import PlaylistCard from '@/components/playlist/PlaylistCard.vue'
 import SongList from '@/components/song/SongList.vue'
 import { usePagedList } from '@/composables/usePagedList'
 import { RouteName } from '@/constants/route'
 import { usePlayerStore } from '@/stores/player'
-import ArtistCard from '@/views/artist/components/ArtistCard.vue'
 
 const SearchTab = { Song: 'song', Playlist: 'playlist', Artist: 'artist' } as const
 type SearchTab = (typeof SearchTab)[keyof typeof SearchTab]

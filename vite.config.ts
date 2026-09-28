@@ -45,7 +45,7 @@ export default defineConfig({
   },
   test: {
     environment: 'happy-dom',
-    include: ['src/**/*.test.ts'],
+    include: ['tests/unit/**/*.test.ts'],
     restoreMocks: true,
     unstubEnvs: true,
   },

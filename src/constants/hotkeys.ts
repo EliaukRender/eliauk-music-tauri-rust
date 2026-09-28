@@ -47,7 +47,7 @@ export const appHotkeys: HotkeyDefinition[] = [
 /** 音量快捷键步长 */
 export const VOLUME_STEP = 10
 
-/** 与 src-tauri/src/shortcuts.rs 的 GlobalAction 保持一致 */
+/** 与 src-tauri/src/system/shortcuts.rs 的 GlobalAction 保持一致 */
 export const GlobalAction = {
   TogglePlay: 'toggle-play',
   Prev: 'prev',

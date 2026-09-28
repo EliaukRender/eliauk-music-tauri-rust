@@ -10,7 +10,7 @@ import { useMiniStore } from '@/stores/mini'
 
 import MiniQueue from './components/MiniQueue.vue'
 
-/** 与 src-tauri/src/mini_window.rs 保持一致 */
+/** 与 src-tauri/src/window/mini.rs 保持一致 */
 const COLLAPSED_HEIGHT = 96
 const EXPANDED_HEIGHT = 400
 

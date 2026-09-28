@@ -37,7 +37,14 @@ export default defineConfigWithVueTs(
         'error',
         { selector: 'TSEnumDeclaration', message: '使用 as const 对象代替 enum' },
       ],
+      // 模块化约束：超过上限按职责拆分，见 docs/开发规范.md「模块化」
+      'max-lines': ['error', { max: 250, skipBlankLines: true, skipComments: true }],
     },
+  },
+  {
+    name: 'app/tests',
+    files: ['tests/**/*.ts'],
+    rules: { 'max-lines': ['error', { max: 400, skipBlankLines: true, skipComments: true }] },
   },
   {
     // 模块扩充只能通过 interface 合并声明
