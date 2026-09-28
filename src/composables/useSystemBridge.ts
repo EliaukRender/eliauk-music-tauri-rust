@@ -3,6 +3,7 @@ import { onScopeDispose, watch } from 'vue'
 import type { PlayerCommand } from '@/constants/events'
 import { audioEngine } from '@/services/player/audio-engine'
 import { onPlayerCommand, syncPlayerState } from '@/services/tauri/system-bridge'
+import { useLikeStore } from '@/stores/like'
 import { usePlayerStore } from '@/stores/player'
 import { joinArtists, resizeImage } from '@/utils/format'
 
@@ -10,9 +11,10 @@ type Handlers = {
   [K in PlayerCommand['type']]: (command: Extract<PlayerCommand, { type: K }>) => void
 }
 
-/** 主窗口与系统层（托盘、媒体中心）的双向同步：接收播放指令，推送播放状态 */
+/** 主窗口与系统层（托盘、媒体中心、mini 窗口）的双向同步：接收播放指令，推送播放状态 */
 export function useSystemBridge() {
   const player = usePlayerStore()
+  const like = useLikeStore()
 
   const handlers: Handlers = {
     toggle: () => void player.toggle(),
@@ -24,6 +26,13 @@ export function useSystemBridge() {
     next: () => player.next(),
     seek: ({ position }) => player.seek(position),
     'seek-by': ({ delta }) => player.seekBy(delta),
+    'play-song': ({ id }) => {
+      const song = player.queue.find((s) => s.id === id)
+      if (song) player.playSong(song)
+    },
+    'toggle-like': () => {
+      if (player.currentSong) void like.toggle(player.currentSong.id)
+    },
   }
 
   let unlisten: (() => void) | undefined

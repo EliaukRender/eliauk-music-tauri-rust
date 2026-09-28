@@ -36,8 +36,12 @@ tauri-plugin-global-shortcut = "2"
 tauri-plugin-single-instance = "2"
 tauri-plugin-window-state = "2"
 
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2-app-kit = { version = "0.3", default-features = false, features = ["std", "NSWindow", "NSButton", "NSControl", "NSView", "NSResponder"] }
+
 [lints.rust]
-unsafe_code = "forbid"
+# deny 而非 forbid：仅 src/macos.rs 需要调用 AppKit，在模块内显式放开
+unsafe_code = "deny"
 
 [lints.clippy]
 all = { level = "warn", priority = -1 }

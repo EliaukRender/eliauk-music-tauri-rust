@@ -5,6 +5,8 @@ import ProgressBar from '@/components/player/ProgressBar.vue'
 import QueueEntryButton from '@/components/player/QueueEntryButton.vue'
 import VolumeControl from '@/components/player/VolumeControl.vue'
 import SpectrumEntryButton from '@/components/spectrum/SpectrumEntryButton.vue'
+import { toggleMiniPlayer } from '@/services/tauri/mini'
+import { isDesktop } from '@/utils/platform'
 </script>
 
 <template>
@@ -19,6 +21,14 @@ import SpectrumEntryButton from '@/components/spectrum/SpectrumEntryButton.vue'
     </div>
 
     <div class="flex items-center justify-end gap-4 text-muted">
+      <button
+        v-if="isDesktop"
+        class="hover:text-fg"
+        title="mini 播放器"
+        @click="toggleMiniPlayer()"
+      >
+        <i-ri-picture-in-picture-2-line class="text-lg" />
+      </button>
       <SpectrumEntryButton />
       <VolumeControl />
       <QueueEntryButton />

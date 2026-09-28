@@ -1,6 +1,9 @@
 mod api_server;
 mod events;
+#[cfg(target_os = "macos")]
+mod macos;
 mod media_controls;
+mod mini_window;
 mod player_sync;
 mod shortcuts;
 mod tray;
@@ -37,6 +40,8 @@ pub fn run() {
             // 不恢复可见性：macOS 隐藏到 Dock 后退出，下次启动不应保持隐藏
             tauri_plugin_window_state::Builder::new()
                 .with_state_flags(StateFlags::all() & !StateFlags::VISIBLE)
+                // mini 窗口尺寸由折叠状态决定，创建后只恢复位置（见 mini_window.rs）
+                .skip_initial_state(mini_window::MINI_WINDOW)
                 .build(),
         )
         .plugin(shortcuts::plugin())
@@ -52,8 +57,11 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             api_server::get_api_endpoint,
             window::set_close_behavior,
+            window::focus_main_window,
             player_sync::sync_player_state,
-            shortcuts::set_global_shortcuts
+            shortcuts::set_global_shortcuts,
+            mini_window::toggle_mini_player,
+            mini_window::resize_mini_player
         ])
         .setup(|app| {
             #[cfg(feature = "embedded-api")]

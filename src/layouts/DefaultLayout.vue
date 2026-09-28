@@ -8,6 +8,7 @@ import PlaylistEditModal from '@/components/playlist/PlaylistEditModal.vue'
 import LoginModal from '@/components/user/LoginModal.vue'
 import { useGlobalShortcutsSync } from '@/composables/useGlobalShortcutsSync'
 import { useHotkeys } from '@/composables/useHotkeys'
+import { useMiniBridge } from '@/composables/useMiniBridge'
 import { useSystemBridge } from '@/composables/useSystemBridge'
 import { useWindowState } from '@/composables/useWindowState'
 import { CONTENT_OVERLAY_ID } from '@/constants/layout'
@@ -19,6 +20,7 @@ useWindowState()
 useHotkeys()
 useSystemBridge()
 useGlobalShortcutsSync()
+useMiniBridge()
 </script>
 
 <template>

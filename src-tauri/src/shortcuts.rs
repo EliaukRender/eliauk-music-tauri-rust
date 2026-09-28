@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, Emitter, Manager, Runtime, State};
+use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 
 use crate::events::{PlayerCommand, PLAYER_COMMAND};
@@ -15,15 +15,30 @@ pub enum GlobalAction {
     TogglePlay,
     Prev,
     Next,
+    ToggleMini,
 }
 
 impl GlobalAction {
-    fn command(self) -> PlayerCommand {
+    /// 返回 None 的动作由 Rust 端直接处理
+    fn command(self) -> Option<PlayerCommand> {
         match self {
-            Self::TogglePlay => PlayerCommand::Toggle,
-            Self::Prev => PlayerCommand::Prev,
-            Self::Next => PlayerCommand::Next,
+            Self::TogglePlay => Some(PlayerCommand::Toggle),
+            Self::Prev => Some(PlayerCommand::Prev),
+            Self::Next => Some(PlayerCommand::Next),
+            Self::ToggleMini => None,
         }
+    }
+}
+
+fn dispatch(app: &AppHandle, action: GlobalAction) {
+    let result = match action.command() {
+        Some(command) => app
+            .emit_to(MAIN_WINDOW, PLAYER_COMMAND, command)
+            .map_err(|e| e.to_string()),
+        None => crate::mini_window::toggle(app).map_err(|e| e.to_string()),
+    };
+    if let Err(error) = result {
+        log::warn!("执行全局快捷键 {action:?} 失败: {error}");
     }
 }
 
@@ -44,7 +59,7 @@ pub struct ShortcutFailure {
 #[derive(Default)]
 pub struct ShortcutRegistry(Mutex<HashMap<u32, GlobalAction>>);
 
-pub fn plugin<R: Runtime>() -> tauri::plugin::TauriPlugin<R> {
+pub fn plugin() -> tauri::plugin::TauriPlugin<tauri::Wry> {
     tauri_plugin_global_shortcut::Builder::new()
         .with_handler(|app, shortcut, event| {
             if event.state != ShortcutState::Pressed {
@@ -57,9 +72,7 @@ pub fn plugin<R: Runtime>() -> tauri::plugin::TauriPlugin<R> {
                 .ok()
                 .and_then(|map| map.get(&shortcut.id()).copied());
             if let Some(action) = action {
-                if let Err(error) = app.emit_to(MAIN_WINDOW, PLAYER_COMMAND, action.command()) {
-                    log::warn!("发送全局快捷键指令失败: {error}");
-                }
+                dispatch(app, action);
             }
         })
         .build()
@@ -111,7 +124,9 @@ mod tests {
         )
         .unwrap();
         assert_eq!(bindings[0].action, GlobalAction::TogglePlay);
-        assert_eq!(bindings[0].action.command(), PlayerCommand::Toggle);
+        assert_eq!(bindings[0].action.command(), Some(PlayerCommand::Toggle));
+        let mini: GlobalAction = serde_json::from_str(r#""toggle-mini""#).unwrap();
+        assert_eq!(mini.command(), None);
     }
 
     #[test]
@@ -120,6 +135,7 @@ mod tests {
             "CommandOrControl+Alt+Space",
             "CommandOrControl+Alt+Left",
             "CommandOrControl+Alt+Right",
+            "CommandOrControl+Alt+M",
         ] {
             assert!(accelerator.parse::<Shortcut>().is_ok(), "{accelerator}");
         }

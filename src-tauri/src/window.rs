@@ -31,6 +31,12 @@ pub fn set_close_behavior(behavior: CloseBehavior, settings: State<'_, WindowSet
     *settings.close_behavior.lock().unwrap() = behavior;
 }
 
+/// mini 窗口「返回主界面」
+#[tauri::command]
+pub fn focus_main_window(app: AppHandle) {
+    show_main_window(&app);
+}
+
 pub fn main_window(app: &AppHandle) -> Option<WebviewWindow> {
     app.get_webview_window(MAIN_WINDOW)
 }

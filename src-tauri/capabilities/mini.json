@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "mini",
+  "description": "mini 播放器窗口：拖拽、隐藏；尺寸调整走自定义 command",
+  "windows": ["mini"],
+  "permissions": ["core:default", "core:window:allow-start-dragging", "core:window:allow-hide"]
+}

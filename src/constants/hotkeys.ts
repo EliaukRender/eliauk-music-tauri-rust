@@ -52,6 +52,7 @@ export const GlobalAction = {
   TogglePlay: 'toggle-play',
   Prev: 'prev',
   Next: 'next',
+  ToggleMini: 'toggle-mini',
 } as const
 export type GlobalAction = (typeof GlobalAction)[keyof typeof GlobalAction]
 
@@ -59,6 +60,7 @@ export const globalActionLabels: Record<GlobalAction, string> = {
   [GlobalAction.TogglePlay]: '播放 / 暂停',
   [GlobalAction.Prev]: '上一首',
   [GlobalAction.Next]: '下一首',
+  [GlobalAction.ToggleMini]: '显示 / 隐藏 mini 播放器',
 }
 
 /** Tauri accelerator 格式 */
@@ -66,4 +68,5 @@ export const defaultGlobalShortcuts: Record<GlobalAction, string> = {
   [GlobalAction.TogglePlay]: 'CommandOrControl+Alt+Space',
   [GlobalAction.Prev]: 'CommandOrControl+Alt+Left',
   [GlobalAction.Next]: 'CommandOrControl+Alt+Right',
+  [GlobalAction.ToggleMini]: 'CommandOrControl+Alt+M',
 }

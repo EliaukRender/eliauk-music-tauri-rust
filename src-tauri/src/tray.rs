@@ -16,6 +16,7 @@ const MENU_NOW_PLAYING: &str = "tray-now-playing";
 const MENU_TOGGLE: &str = "tray-toggle";
 const MENU_PREV: &str = "tray-prev";
 const MENU_NEXT: &str = "tray-next";
+const MENU_MINI: &str = "tray-mini";
 const MENU_SHOW: &str = "tray-show";
 const MENU_QUIT: &str = "tray-quit";
 
@@ -74,6 +75,7 @@ pub fn init(app: &AppHandle) -> tauri::Result<()> {
     let toggle = MenuItem::with_id(app, MENU_TOGGLE, toggle_label(&initial), true, None::<&str>)?;
     let prev = MenuItem::with_id(app, MENU_PREV, "上一首", true, None::<&str>)?;
     let next = MenuItem::with_id(app, MENU_NEXT, "下一首", true, None::<&str>)?;
+    let mini = MenuItem::with_id(app, MENU_MINI, "mini 播放器", true, None::<&str>)?;
     let show = MenuItem::with_id(app, MENU_SHOW, "显示主界面", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, MENU_QUIT, "退出", true, None::<&str>)?;
     let menu = Menu::with_items(
@@ -85,6 +87,7 @@ pub fn init(app: &AppHandle) -> tauri::Result<()> {
             &prev,
             &next,
             &PredefinedMenuItem::separator(app)?,
+            &mini,
             &show,
             &quit,
         ],
@@ -103,6 +106,11 @@ pub fn init(app: &AppHandle) -> tauri::Result<()> {
             MENU_TOGGLE => send_command(app, PlayerCommand::Toggle),
             MENU_PREV => send_command(app, PlayerCommand::Prev),
             MENU_NEXT => send_command(app, PlayerCommand::Next),
+            MENU_MINI => {
+                if let Err(error) = crate::mini_window::toggle(app) {
+                    log::warn!("切换 mini 播放器失败: {error}");
+                }
+            }
             MENU_SHOW => show_main_window(app),
             MENU_QUIT => app.exit(0),
             _ => {}

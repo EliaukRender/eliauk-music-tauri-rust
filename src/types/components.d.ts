@@ -34,6 +34,7 @@ declare module 'vue' {
     IRiMusic2Fill: typeof import('~icons/ri/music2-fill')['default']
     IRiMusic2Line: typeof import('~icons/ri/music2-line')['default']
     IRiPauseFill: typeof import('~icons/ri/pause-fill')['default']
+    IRiPictureInPicture2Line: typeof import('~icons/ri/picture-in-picture2-line')['default']
     IRiPlayFill: typeof import('~icons/ri/play-fill')['default']
     IRiPlayList2Line: typeof import('~icons/ri/play-list2-line')['default']
     IRiRefreshLine: typeof import('~icons/ri/refresh-line')['default']
