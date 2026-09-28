@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 
+import SearchBox from '@/components/layout/SearchBox.vue'
 import UserEntry from '@/components/user/UserEntry.vue'
 import { RouteName } from '@/constants/route'
 import { useAppStore } from '@/stores/app'
@@ -29,9 +30,7 @@ function toggleTheme() {
       </n-button>
     </div>
 
-    <n-input round size="small" placeholder="搜索音乐、歌手、歌单" class="max-w-64" disabled>
-      <template #prefix><i-ri-search-line class="text-muted" /></template>
-    </n-input>
+    <SearchBox />
 
     <div data-tauri-drag-region class="h-full flex-1" />
 

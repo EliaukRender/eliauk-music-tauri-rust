@@ -4,6 +4,7 @@ export const RouteName = {
   Toplist: 'toplist',
   Artist: 'artist',
   ArtistDetail: 'artist-detail',
+  Search: 'search',
   Settings: 'settings',
 } as const
 

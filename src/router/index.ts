@@ -42,6 +42,16 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '歌手' },
       },
       {
+        path: 'search',
+        name: RouteName.Search,
+        component: () => import('@/views/search/SearchView.vue'),
+        props: (route) => ({
+          keywords: String(route.query.keywords ?? ''),
+          type: route.query.type ? String(route.query.type) : undefined,
+        }),
+        meta: { title: '搜索' },
+      },
+      {
         path: 'settings',
         name: RouteName.Settings,
         component: () => import('@/views/settings/SettingsView.vue'),
