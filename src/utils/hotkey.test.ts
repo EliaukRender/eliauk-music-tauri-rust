@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatHotkey, isKeyboardCaptureTarget, matchHotkey } from './hotkey'
+import {
+  eventToAccelerator,
+  formatAccelerator,
+  formatHotkey,
+  isKeyboardCaptureTarget,
+  matchHotkey,
+} from './hotkey'
 
 const key = (
   k: string,
@@ -57,5 +63,29 @@ describe('utils/hotkey', () => {
     expect(formatHotkey('Mod+ArrowLeft', false)).toBe('Ctrl + ←')
     expect(formatHotkey('Space', false)).toBe('Space')
     expect(formatHotkey('Ctrl+Mod+F', true)).toBe('⌃⌘F')
+  })
+
+  it('按键事件转换为 accelerator', () => {
+    const event = (k: string, code: string, mods: Parameters<typeof key>[1] = {}) => ({
+      ...key(k, mods),
+      code,
+    })
+    expect(eventToAccelerator(event(' ', 'Space', { meta: true, alt: true }), true)).toBe(
+      'CommandOrControl+Alt+Space',
+    )
+    expect(eventToAccelerator(event('ArrowLeft', 'ArrowLeft', { ctrl: true }), false)).toBe(
+      'CommandOrControl+Left',
+    )
+    // macOS 上 ⌥+P 得到的 key 是 π，按 code 取字母
+    expect(eventToAccelerator(event('π', 'KeyP', { meta: true, alt: true }), true)).toBe(
+      'CommandOrControl+Alt+P',
+    )
+    expect(eventToAccelerator(event('a', 'KeyA'), true)).toBeNull()
+    expect(eventToAccelerator(event('Meta', 'MetaLeft', { meta: true }), true)).toBeNull()
+  })
+
+  it('accelerator 按平台展示', () => {
+    expect(formatAccelerator('CommandOrControl+Alt+Left', true)).toBe('⌘⌥←')
+    expect(formatAccelerator('CommandOrControl+Alt+Space', false)).toBe('Ctrl + Alt + Space')
   })
 })

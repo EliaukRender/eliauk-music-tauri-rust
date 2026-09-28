@@ -6,6 +6,7 @@ import TitleBar from '@/components/layout/TitleBar.vue'
 import PlayQueueDrawer from '@/components/player/PlayQueueDrawer.vue'
 import PlaylistEditModal from '@/components/playlist/PlaylistEditModal.vue'
 import LoginModal from '@/components/user/LoginModal.vue'
+import { useGlobalShortcutsSync } from '@/composables/useGlobalShortcutsSync'
 import { useHotkeys } from '@/composables/useHotkeys'
 import { useSystemBridge } from '@/composables/useSystemBridge'
 import { useWindowState } from '@/composables/useWindowState'
@@ -17,6 +18,7 @@ const app = useAppStore()
 useWindowState()
 useHotkeys()
 useSystemBridge()
+useGlobalShortcutsSync()
 </script>
 
 <template>

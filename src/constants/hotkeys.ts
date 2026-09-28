@@ -46,3 +46,24 @@ export const appHotkeys: HotkeyDefinition[] = [
 
 /** 音量快捷键步长 */
 export const VOLUME_STEP = 10
+
+/** 与 src-tauri/src/shortcuts.rs 的 GlobalAction 保持一致 */
+export const GlobalAction = {
+  TogglePlay: 'toggle-play',
+  Prev: 'prev',
+  Next: 'next',
+} as const
+export type GlobalAction = (typeof GlobalAction)[keyof typeof GlobalAction]
+
+export const globalActionLabels: Record<GlobalAction, string> = {
+  [GlobalAction.TogglePlay]: '播放 / 暂停',
+  [GlobalAction.Prev]: '上一首',
+  [GlobalAction.Next]: '下一首',
+}
+
+/** Tauri accelerator 格式 */
+export const defaultGlobalShortcuts: Record<GlobalAction, string> = {
+  [GlobalAction.TogglePlay]: 'CommandOrControl+Alt+Space',
+  [GlobalAction.Prev]: 'CommandOrControl+Alt+Left',
+  [GlobalAction.Next]: 'CommandOrControl+Alt+Right',
+}

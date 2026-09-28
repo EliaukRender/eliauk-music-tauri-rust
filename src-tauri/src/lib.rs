@@ -1,5 +1,6 @@
 mod api_server;
 mod events;
+mod shortcuts;
 mod tray;
 mod window;
 
@@ -36,6 +37,7 @@ pub fn run() {
                 .with_state_flags(StateFlags::all() & !StateFlags::VISIBLE)
                 .build(),
         )
+        .plugin(shortcuts::plugin())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init());
 
@@ -44,10 +46,12 @@ pub fn run() {
 
     let app = builder
         .manage(WindowSettings::default())
+        .manage(shortcuts::ShortcutRegistry::default())
         .invoke_handler(tauri::generate_handler![
             api_server::get_api_endpoint,
             window::set_close_behavior,
-            tray::sync_player_state
+            tray::sync_player_state,
+            shortcuts::set_global_shortcuts
         ])
         .setup(|app| {
             #[cfg(feature = "embedded-api")]

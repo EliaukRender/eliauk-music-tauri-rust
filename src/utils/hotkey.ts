@@ -51,3 +51,53 @@ export function formatHotkey(keys: string, isMac: boolean): string {
     .map((part) => names[part] ?? part)
     .join(isMac ? '' : ' + ')
 }
+
+const MODIFIER_KEYS = new Set(['Meta', 'Control', 'Alt', 'Shift', 'CapsLock', 'Fn'])
+
+const ACCELERATOR_KEYS: Record<string, string> = {
+  ' ': 'Space',
+  ArrowLeft: 'Left',
+  ArrowRight: 'Right',
+  ArrowUp: 'Up',
+  ArrowDown: 'Down',
+}
+
+/**
+ * 把按键事件转成 Tauri accelerator（如 CommandOrControl+Alt+Space）。
+ * 全局快捷键至少要有一个修饰键，否则会吞掉普通输入；不满足时返回 null
+ */
+export function eventToAccelerator(
+  event: KeyEventLike & Pick<KeyboardEvent, 'code'>,
+  isMac: boolean,
+): string | null {
+  if (MODIFIER_KEYS.has(event.key)) return null
+  const parts: string[] = []
+  if (isMac ? event.metaKey : event.ctrlKey) parts.push('CommandOrControl')
+  if (isMac && event.ctrlKey) parts.push('Control')
+  if (event.altKey) parts.push('Alt')
+  if (event.shiftKey) parts.push('Shift')
+  if (!parts.length) return null
+  // Alt/Option 组合会改变 event.key（如 ⌥+A 得到 å），字母数字改用 code
+  const fromCode = event.code.match(/^(?:Key|Digit)(\w)$/)?.[1]
+  const key = fromCode ?? ACCELERATOR_KEYS[event.key] ?? normalizeKey(event.key)
+  return [...parts, key].join('+')
+}
+
+/** accelerator 转为 formatHotkey 使用的写法后展示 */
+export function formatAccelerator(accelerator: string, isMac: boolean): string {
+  const map: Record<string, string> = {
+    CommandOrControl: 'Mod',
+    Control: 'Ctrl',
+    Left: 'ArrowLeft',
+    Right: 'ArrowRight',
+    Up: 'ArrowUp',
+    Down: 'ArrowDown',
+  }
+  return formatHotkey(
+    accelerator
+      .split('+')
+      .map((part) => map[part] ?? part)
+      .join('+'),
+    isMac,
+  )
+}
