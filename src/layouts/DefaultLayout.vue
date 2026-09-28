@@ -8,12 +8,13 @@ import PlaylistEditModal from '@/components/playlist/PlaylistEditModal.vue'
 import LoginModal from '@/components/user/LoginModal.vue'
 import { CONTENT_OVERLAY_ID } from '@/constants/layout'
 import { useAppStore } from '@/stores/app'
+import LyricView from '@/views/lyric/LyricView.vue'
 
 const app = useAppStore()
 </script>
 
 <template>
-  <div class="flex h-full flex-col">
+  <div class="relative flex h-full flex-col">
     <div class="flex min-h-0 flex-1">
       <SideMenu />
       <div class="flex min-w-0 flex-1 flex-col">
@@ -25,6 +26,7 @@ const app = useAppStore()
         </div>
       </div>
     </div>
+    <LyricView />
     <PlayerBar />
     <PlayQueueDrawer />
     <LoginModal v-model:show="app.loginModalVisible" />
