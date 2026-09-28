@@ -4,6 +4,8 @@ import { storeToRefs } from 'pinia'
 import { usePlayerStore } from '@/stores/player'
 import { joinArtists, resizeImage } from '@/utils/format'
 
+import LikeButton from './LikeButton.vue'
+
 const { currentSong, trial } = storeToRefs(usePlayerStore())
 </script>
 
@@ -27,6 +29,7 @@ const { currentSong, trial } = storeToRefs(usePlayerStore())
         <n-tag v-if="trial" size="tiny" type="warning" :bordered="false" class="shrink-0">
           试听
         </n-tag>
+        <LikeButton v-if="currentSong" :song-id="currentSong.id" class="ml-1 text-base" />
       </p>
       <p class="truncate text-xs text-muted">
         {{ currentSong ? joinArtists(currentSong.artists) : 'Eliauk 音乐' }}

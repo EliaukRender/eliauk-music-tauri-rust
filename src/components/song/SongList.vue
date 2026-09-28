@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 
+import LikeButton from '@/components/player/LikeButton.vue'
 import { PlayStatus } from '@/constants/player'
 import { usePlayerStore } from '@/stores/player'
 import type { Song } from '@/types/music'
@@ -21,9 +22,10 @@ function play(song: Song) {
 <template>
   <div class="text-sm">
     <div
-      class="grid h-9 grid-cols-[48px_minmax(0,5fr)_minmax(0,3fr)_minmax(0,3fr)_56px] items-center gap-3 px-3 text-xs text-muted"
+      class="grid h-9 grid-cols-[48px_20px_minmax(0,5fr)_minmax(0,3fr)_minmax(0,3fr)_56px] items-center gap-3 px-3 text-xs text-muted"
     >
       <span class="text-center">#</span>
+      <span />
       <span>标题</span>
       <span>歌手</span>
       <span>专辑</span>
@@ -40,7 +42,7 @@ function play(song: Song) {
       v-for="(song, index) in songs"
       v-else
       :key="song.id"
-      class="song-row grid h-10 cursor-default grid-cols-[48px_minmax(0,5fr)_minmax(0,3fr)_minmax(0,3fr)_56px] items-center gap-3 rounded-lg px-3 hover:bg-black/4 dark:hover:bg-white/6"
+      class="song-row grid h-10 cursor-default grid-cols-[48px_20px_minmax(0,5fr)_minmax(0,3fr)_minmax(0,3fr)_56px] items-center gap-3 rounded-lg px-3 hover:bg-black/4 dark:hover:bg-white/6"
       :class="{
         'text-primary': song.id === currentId,
         'opacity-40': song.unavailable,
@@ -56,6 +58,7 @@ function play(song: Song) {
         </template>
         <template v-else>{{ String(index + 1).padStart(2, '0') }}</template>
       </span>
+      <LikeButton :song-id="song.id" />
       <span class="flex min-w-0 items-center gap-1.5">
         <span class="truncate">{{ song.name }}</span>
         <n-tag v-if="song.fee === 1" size="tiny" type="primary" :bordered="false" class="shrink-0">

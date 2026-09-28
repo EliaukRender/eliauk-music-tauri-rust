@@ -175,6 +175,7 @@ export const usePlaylistStore = defineStore('playlist', () => {
     rename,
     addSongs,
     removeSongs,
+    adjustTrackCount,
     clear,
   }
 })
