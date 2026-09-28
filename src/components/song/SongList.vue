@@ -3,10 +3,11 @@ import { storeToRefs } from 'pinia'
 
 import LikeButton from '@/components/player/LikeButton.vue'
 import { PlayStatus } from '@/constants/player'
+import { RouteName } from '@/constants/route'
 import { useSongMenu } from '@/features/context-menus'
 import { usePlayerStore } from '@/stores/player'
 import type { Song } from '@/types/music'
-import { formatDuration, joinArtists } from '@/utils/format'
+import { formatDuration } from '@/utils/format'
 
 const props = withDefaults(
   defineProps<{
@@ -75,7 +76,19 @@ function play(song: Song) {
         </n-tag>
       </span>
       <span class="truncate" :class="{ 'text-muted': song.id !== currentId }">
-        {{ joinArtists(song.artists) }}
+        <template v-for="(artist, i) in song.artists" :key="artist.id || i">
+          <template v-if="i"> / </template>
+          <RouterLink
+            v-if="artist.id"
+            :to="{ name: RouteName.ArtistDetail, params: { id: artist.id } }"
+            draggable="false"
+            class="hover:text-fg hover:underline"
+            @dblclick.stop
+          >
+            {{ artist.name }}
+          </RouterLink>
+          <template v-else>{{ artist.name }}</template>
+        </template>
       </span>
       <span class="truncate" :class="{ 'text-muted': song.id !== currentId }">
         {{ song.album.name }}

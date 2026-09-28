@@ -86,3 +86,26 @@ export type Toplist = {
   preview: { name: string; artist: string }[]
   official: boolean
 }
+
+export type ArtistSummary = {
+  id: number
+  name: string
+  avatar: string
+  alias: string[]
+}
+
+export type ArtistDetail = ArtistSummary & {
+  cover: string
+  briefDesc: string
+  albumSize: number
+  musicSize: number
+}
+
+export type AlbumSummary = {
+  id: number
+  name: string
+  picUrl: string
+  /** 毫秒时间戳 */
+  publishTime: number
+  size: number
+}

@@ -3,8 +3,6 @@ import { createRouter, createWebHashHistory, type RouteRecordRaw } from 'vue-rou
 import { RouteName } from '@/constants/route'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 
-const PlaceholderView = () => import('@/views/placeholder/PlaceholderView.vue')
-
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
@@ -33,8 +31,15 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'artist',
         name: RouteName.Artist,
-        component: PlaceholderView,
-        meta: { title: '歌手', doc: '10-音乐馆.md' },
+        component: () => import('@/views/artist/ArtistsView.vue'),
+        meta: { title: '歌手' },
+      },
+      {
+        path: 'artist/:id(\\d+)',
+        name: RouteName.ArtistDetail,
+        component: () => import('@/views/artist/ArtistDetailView.vue'),
+        props: (route) => ({ id: Number(route.params.id) }),
+        meta: { title: '歌手' },
       },
       {
         path: 'settings',
