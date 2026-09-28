@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 
 import WindowControls from '@/components/layout/WindowControls.vue'
 import LikeButton from '@/components/player/LikeButton.vue'
+import SpectrumCanvas from '@/components/spectrum/SpectrumCanvas.vue'
 import { LYRIC_OFFSET_STEP, LyricStatus, useLyricStore } from '@/stores/lyric'
 import { usePlayerStore } from '@/stores/player'
 import { joinArtists } from '@/utils/format'
@@ -43,6 +44,7 @@ function formatOffset(value: number) {
       class="dark absolute inset-x-0 top-0 bottom-[72px] z-30 flex flex-col overflow-hidden text-white"
     >
       <LyricBackground :cover="currentSong?.album.picUrl ?? ''" />
+      <SpectrumCanvas class="absolute! inset-x-0 bottom-0 h-28! opacity-60" />
 
       <header
         data-tauri-drag-region

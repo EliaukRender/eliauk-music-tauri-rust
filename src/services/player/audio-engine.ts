@@ -1,4 +1,11 @@
+import { DEFAULT_FFT_SIZE } from '@/constants/spectrum'
+import { logger } from '@/services/logger'
+
 type MediaEvent = keyof HTMLMediaElementEventMap
+
+/** 开始播放后等待多久采样频谱，用于判断是否因 CORS 被静音 */
+const SILENCE_CHECK_DELAY = 1500
+const SILENCE_CHECK_FRAMES = 5
 
 /**
  * 全局唯一的播放层，不依赖 Pinia。
@@ -13,6 +20,9 @@ class AudioEngine {
   private muted = false
   /** 元数据就绪前设置 currentTime 在 WebKit 上不可靠，延后到 loadedmetadata */
   private pendingStart = 0
+  private fftSize: number = DEFAULT_FFT_SIZE
+  /** 已判定过的 CDN 域名，每个域名只检测一次 */
+  private checkedHosts = new Set<string>()
 
   constructor() {
     this.audio = new Audio()
@@ -23,6 +33,7 @@ class AudioEngine {
       if (this.pendingStart > 0) this.audio.currentTime = this.pendingStart
       this.pendingStart = 0
     })
+    this.audio.addEventListener('playing', () => this.scheduleSilenceCheck())
   }
 
   get currentTime() {
@@ -89,9 +100,45 @@ class AudioEngine {
     this.applyVolume()
   }
 
+  /** 只读取，不创建：AudioContext 必须在用户手势（play）中创建，否则会以挂起状态接管输出 */
   getAnalyser() {
-    this.ensureGraph()
     return this.analyser
+  }
+
+  setFftSize(size: number) {
+    this.fftSize = size
+    if (this.analyser) this.analyser.fftSize = size
+  }
+
+  /**
+   * 媒体跨域且没有 CORS 授权时 MediaElementSource 输出静音，频谱全为 0。
+   * 目前 CDN 都带 CORS 头，这里只记录日志，出现实际案例再实现 Rust 代理降级（见 06 文档）
+   */
+  private scheduleSilenceCheck() {
+    const analyser = this.analyser
+    const host = this.hostOf(this.audio.currentSrc)
+    if (!analyser || !host || this.checkedHosts.has(host)) return
+    const startTime = this.audio.currentTime
+    setTimeout(async () => {
+      if (this.audio.paused || this.hostOf(this.audio.currentSrc) !== host) return
+      if (this.audio.currentTime <= startTime) return
+      this.checkedHosts.add(host)
+      const data = new Uint8Array(analyser.frequencyBinCount)
+      for (let i = 0; i < SILENCE_CHECK_FRAMES; i++) {
+        analyser.getByteFrequencyData(data)
+        if (data.some((v) => v > 0)) return
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+      logger.warn(`[audio-engine] 频谱数据全为 0，疑似 ${host} 未返回 CORS 头`)
+    }, SILENCE_CHECK_DELAY)
+  }
+
+  private hostOf(url: string) {
+    try {
+      return new URL(url).host
+    } catch {
+      return ''
+    }
   }
 
   private applyVolume() {
@@ -111,6 +158,7 @@ class AudioEngine {
       const context = new AudioContext()
       const source = context.createMediaElementSource(this.audio)
       const analyser = context.createAnalyser()
+      analyser.fftSize = this.fftSize
       const gain = context.createGain()
       source.connect(analyser)
       analyser.connect(gain)

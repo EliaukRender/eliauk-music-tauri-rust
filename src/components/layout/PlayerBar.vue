@@ -4,6 +4,7 @@ import PlayControls from '@/components/player/PlayControls.vue'
 import ProgressBar from '@/components/player/ProgressBar.vue'
 import QueueEntryButton from '@/components/player/QueueEntryButton.vue'
 import VolumeControl from '@/components/player/VolumeControl.vue'
+import SpectrumEntryButton from '@/components/spectrum/SpectrumEntryButton.vue'
 </script>
 
 <template>
@@ -18,6 +19,7 @@ import VolumeControl from '@/components/player/VolumeControl.vue'
     </div>
 
     <div class="flex items-center justify-end gap-4 text-muted">
+      <SpectrumEntryButton />
       <VolumeControl />
       <QueueEntryButton />
     </div>
