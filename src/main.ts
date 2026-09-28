@@ -31,11 +31,15 @@ async function bootstrap() {
     createApp(MiniApp).use(pinia).mount('#app')
     return
   }
-  const [{ default: App }, { router }] = await Promise.all([
+  const [{ default: App }, { router }, { useUserStore }] = await Promise.all([
     import('./App.vue'),
     import('./router'),
+    import('./stores/user'),
   ])
-  createApp(App).use(pinia).use(router).mount('#app')
+  const app = createApp(App).use(pinia).use(router)
+  // 持久化插件在 pinia 安装到 app 后才生效，所以先 use 再取 store
+  await useUserStore().hydrateCookie()
+  app.mount('#app')
 }
 
 void bootstrap()

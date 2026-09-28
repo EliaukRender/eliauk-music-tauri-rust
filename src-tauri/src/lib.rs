@@ -1,4 +1,5 @@
 mod api_server;
+mod credential;
 mod events;
 #[cfg(target_os = "macos")]
 mod macos;
@@ -61,6 +62,9 @@ pub fn run() {
             player_sync::sync_player_state,
             shortcuts::set_global_shortcuts,
             mini_window::toggle_mini_player,
+            credential::load_credential,
+            credential::save_credential,
+            credential::clear_credential,
             mini_window::resize_mini_player
         ])
         .setup(|app| {
