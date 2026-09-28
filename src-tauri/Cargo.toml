@@ -1,6 +1,6 @@
 [package]
 name = "eliauk-music"
-version = "0.1.0"
+version = "1.0.0"
 description = "Eliauk Music"
 authors = ["eliauk"]
 edition = "2021"

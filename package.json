@@ -1,7 +1,7 @@
 {
   "name": "eliauk-music",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "pnpm tauri:dev",
@@ -17,6 +17,8 @@
     "sidecar:build": "pnpm --filter @eliauk/ncm-api-sidecar build",
     "sidecar:serve": "pnpm --filter @eliauk/ncm-api-sidecar start",
     "icons": "node scripts/generate-icons.mjs",
+    "version:check": "node scripts/version.mjs check",
+    "version:bump": "node scripts/version.mjs",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
