@@ -1,0 +1,17 @@
+{
+  "name": "@eliauk/ncm-api-sidecar",
+  "private": true,
+  "version": "0.1.0",
+  "description": "将 @neteasecloudmusicapienhanced/api 打包为 Tauri sidecar 可执行文件",
+  "main": "src/index.cjs",
+  "scripts": {
+    "start": "node src/index.cjs --port=30488",
+    "build": "node scripts/build.mjs"
+  },
+  "dependencies": {
+    "@neteasecloudmusicapienhanced/api": "4.40.1"
+  },
+  "devDependencies": {
+    "@yao-pkg/pkg": "^6.22.0"
+  }
+}

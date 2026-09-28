@@ -1,0 +1,49 @@
+[package]
+name = "eliauk-music"
+version = "0.1.0"
+description = "Eliauk Music"
+authors = ["eliauk"]
+edition = "2021"
+rust-version = "1.80"
+
+[lib]
+# `_lib` 后缀用于避免 Windows 下 lib 与 bin 同名冲突：https://github.com/rust-lang/cargo/issues/8519
+name = "eliauk_music_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[features]
+default = []
+# 内嵌 NCM API sidecar。远程模式构建时不启用，shell 插件与进程管理代码不会编入产物
+embedded-api = ["dep:tauri-plugin-shell"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
+tauri-plugin-opener = "2"
+tauri-plugin-os = "2"
+tauri-plugin-log = "2"
+tauri-plugin-shell = { version = "2", optional = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+log = "0.4"
+tokio = { version = "1", features = ["sync", "time"] }
+
+[target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
+tauri-plugin-single-instance = "2"
+tauri-plugin-window-state = "2"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+
+# 体积优化参考：https://tauri.app/concept/size/#cargo-configuration
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

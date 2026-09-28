@@ -1,0 +1,10 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "build": {
+    "beforeDevCommand": "pnpm sidecar:build && pnpm dev:web",
+    "beforeBuildCommand": "pnpm sidecar:build && pnpm build:web"
+  },
+  "bundle": {
+    "externalBin": ["binaries/ncm-api"]
+  }
+}

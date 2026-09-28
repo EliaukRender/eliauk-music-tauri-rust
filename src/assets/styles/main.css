@@ -1,0 +1,66 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* 语义色映射为 Tailwind 工具类：bg-surface / text-fg / border-line ... */
+@theme inline {
+  --color-bg: var(--app-bg);
+  --color-surface: var(--app-surface);
+  --color-elevated: var(--app-elevated);
+  --color-fg: var(--app-fg);
+  --color-muted: var(--app-muted);
+  --color-line: var(--app-line);
+  --color-primary: var(--app-primary);
+  --color-primary-hover: var(--app-primary-hover);
+}
+
+@theme {
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei',
+    'Segoe UI', sans-serif;
+}
+
+:root {
+  --app-primary: #e0529c;
+  --app-primary-hover: #ea6bad;
+
+  --app-bg: #f6f6f8;
+  --app-surface: #ffffff;
+  --app-elevated: #fafafa;
+  --app-fg: #1f1f24;
+  --app-muted: #8a8a95;
+  --app-line: #ececf0;
+
+  color-scheme: light;
+}
+
+.dark {
+  --app-bg: #16161a;
+  --app-surface: #1d1d22;
+  --app-elevated: #25252b;
+  --app-fg: #ededf0;
+  --app-muted: #8b8b96;
+  --app-line: #2c2c33;
+
+  color-scheme: dark;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  @apply bg-bg font-sans text-fg antialiased;
+  /* 桌面应用不应出现网页式的整页选中与回弹 */
+  user-select: none;
+  overscroll-behavior: none;
+}
+
+input,
+textarea,
+[contenteditable='true'] {
+  user-select: text;
+}

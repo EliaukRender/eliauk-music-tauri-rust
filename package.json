@@ -1,0 +1,91 @@
+{
+  "name": "eliauk-music",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm tauri:dev",
+    "build": "pnpm tauri:build",
+    "dev:web": "vite",
+    "build:web": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev --config src-tauri/tauri.embedded.conf.json --features embedded-api",
+    "tauri:dev:remote": "tauri dev",
+    "tauri:build": "tauri build --config src-tauri/tauri.embedded.conf.json --features embedded-api",
+    "tauri:build:remote": "tauri build",
+    "sidecar:build": "pnpm --filter @eliauk/ncm-api-sidecar build",
+    "sidecar:serve": "pnpm --filter @eliauk/ncm-api-sidecar start",
+    "icons": "node scripts/generate-icons.mjs",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:rust": "cargo test --manifest-path src-tauri/Cargo.toml --all-features",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:rust": "cargo fmt --manifest-path src-tauri/Cargo.toml --check && cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets --all-features -- -D warnings",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-log": "^2.10.0",
+    "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-os": "^2.4.0",
+    "@vueuse/core": "^15.0.0",
+    "axios": "^1.20.0",
+    "naive-ui": "^2.45.3",
+    "pinia": "^4.0.3",
+    "pinia-plugin-persistedstate": "^4.7.1",
+    "vue": "^3.5.13",
+    "vue-router": "^5.3.1"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@eslint/js": "^10.0.1",
+    "@iconify-json/ri": "^1.2.10",
+    "@tailwindcss/vite": "^4.3.3",
+    "@tauri-apps/cli": "^2",
+    "@types/node": "^26.6.3",
+    "@vitejs/plugin-vue": "^6.0.7",
+    "@vue/eslint-config-prettier": "^10.2.0",
+    "@vue/eslint-config-typescript": "^14.9.0",
+    "@vue/test-utils": "^2.5.1",
+    "eslint": "^10.11.0",
+    "eslint-plugin-simple-import-sort": "^14.0.0",
+    "eslint-plugin-vue": "^10.11.1",
+    "globals": "^17.12.0",
+    "happy-dom": "^20.14.5",
+    "husky": "^9.1.7",
+    "jiti": "^2.7.0",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.9",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.70.1",
+    "unplugin-icons": "^24.0.0",
+    "unplugin-vue-components": "^32.1.0",
+    "vite": "^8.0.16",
+    "vitest": "^5.0.2",
+    "vue-tsc": "^3.3.5"
+  },
+  "description": "Eliauk 音乐 - Tauri + Vue 桌面音乐播放器",
+  "packageManager": "pnpm@11.8.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "lint-staged": {
+    "*.{ts,vue,js,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css,yaml,yml}": [
+      "prettier --write"
+    ],
+    "src-tauri/**/*.rs": [
+      "rustfmt --edition 2021"
+    ]
+  }
+}

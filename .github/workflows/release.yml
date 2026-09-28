@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      api-mode:
+        description: 'API 形态'
+        type: choice
+        options: [embedded, remote]
+        default: embedded
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            target: aarch64-apple-darwin
+          - platform: macos-latest
+            target: x86_64-apple-darwin
+          - platform: windows-latest
+            target: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.platform }}
+    env:
+      API_MODE: ${{ inputs.api-mode || 'embedded' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: pnpm install --frozen-lockfile
+
+      - name: 写入远程 API 地址
+        if: env.API_MODE == 'remote'
+        shell: bash
+        run: echo "VITE_API_BASE_URL=${{ secrets.NCM_API_BASE_URL }}" > .env.production.local
+
+      # sidecar 由 tauri.embedded.conf.json 的 beforeBuildCommand 按 TAURI_ENV_TARGET_TRIPLE 构建
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: >-
+            --target ${{ matrix.target }}
+            ${{ env.API_MODE == 'embedded' && '--config src-tauri/tauri.embedded.conf.json --features embedded-api' || '' }}
+          tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+          releaseName: 'Eliauk Music ${{ github.ref_name }}'
+          releaseDraft: true
