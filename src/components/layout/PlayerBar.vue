@@ -2,6 +2,7 @@
 import NowPlayingInfo from '@/components/player/NowPlayingInfo.vue'
 import PlayControls from '@/components/player/PlayControls.vue'
 import ProgressBar from '@/components/player/ProgressBar.vue'
+import QueueEntryButton from '@/components/player/QueueEntryButton.vue'
 import VolumeControl from '@/components/player/VolumeControl.vue'
 </script>
 
@@ -18,6 +19,7 @@ import VolumeControl from '@/components/player/VolumeControl.vue'
 
     <div class="flex items-center justify-end gap-4 text-muted">
       <VolumeControl />
+      <QueueEntryButton />
     </div>
   </footer>
 </template>

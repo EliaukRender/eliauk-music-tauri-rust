@@ -175,6 +175,55 @@ export const usePlayerStore = defineStore(
       void loadSong(song.id)
     }
 
+    /** 移除当前歌曲时切到同位置的下一首（没有则上一首），原来在播放就继续播放 */
+    function removeFromQueue(id: number) {
+      const index = queue.value.findIndex((s) => s.id === id)
+      if (index === -1) return
+      const wasActive = status.value === PlayStatus.Playing || status.value === PlayStatus.Loading
+      queue.value.splice(index, 1)
+      shuffleOrder.value = shuffleOrder.value.filter((x) => x !== id)
+      if (id !== currentId.value) return
+
+      const fallback = queue.value[index] ?? queue.value[index - 1]
+      if (!fallback) {
+        clearQueue()
+        return
+      }
+      if (wasActive) {
+        void loadSong(fallback.id)
+        return
+      }
+      stop()
+      currentId.value = fallback.id
+      duration.value = fallback.duration / 1000
+      status.value = PlayStatus.Paused
+    }
+
+    function clearQueue() {
+      stop()
+      queue.value = []
+      currentId.value = null
+      shuffleOrder.value = []
+      pendingQueueIds.value = []
+    }
+
+    /** 插到当前歌曲之后，已在队列中的会被移动过来；没有当前歌曲时直接播放 */
+    function insertNext(songs: Song[]) {
+      const list = songs.filter((s) => !s.unavailable && s.id !== currentId.value)
+      if (!list.length) return
+      if (!currentSong.value) {
+        playSongs(list)
+        return
+      }
+      const ids = new Set(list.map((s) => s.id))
+      queue.value = queue.value.filter((s) => !ids.has(s.id))
+      queue.value.splice(currentIndex.value + 1, 0, ...list)
+
+      const order = shuffleOrder.value.filter((x) => !ids.has(x))
+      order.splice(order.indexOf(currentSong.value.id) + 1, 0, ...ids)
+      shuffleOrder.value = order
+    }
+
     async function toggle() {
       if (status.value === PlayStatus.Loading) return
       if (status.value === PlayStatus.Playing) {
@@ -357,6 +406,9 @@ export const usePlayerStore = defineStore(
       isPlaying,
       playSongs,
       playSong,
+      removeFromQueue,
+      clearQueue,
+      insertNext,
       toggle,
       pause,
       stop,

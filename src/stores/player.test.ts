@@ -236,4 +236,97 @@ describe('stores/player', () => {
     expect(restored.status).toBe(PlayStatus.Paused)
     expect(restored.pendingQueueIds).toEqual([])
   })
+
+  describe('队列操作', () => {
+    it('移除非当前歌曲不影响播放', async () => {
+      const player = usePlayerStore()
+      player.playSongs([song(1), song(2), song(3)])
+      await flush()
+      player.removeFromQueue(2)
+      expect(player.queue.map((s) => s.id)).toEqual([1, 3])
+      expect(player.currentId).toBe(1)
+      expect(api.fetchSongUrl).toHaveBeenCalledTimes(1)
+    })
+
+    it('移除正在播放的歌曲时立即播放同位置的下一首', async () => {
+      const player = usePlayerStore()
+      player.playSongs([song(1), song(2), song(3)], 2)
+      await flush()
+      player.removeFromQueue(2)
+      await flush()
+      expect(player.currentId).toBe(3)
+      expect(engine.load).toHaveBeenLastCalledWith('https://cdn/3.mp3', 0)
+      expect(player.status).toBe(PlayStatus.Playing)
+    })
+
+    it('移除最后一首且正在播放时回退到上一首', async () => {
+      const player = usePlayerStore()
+      player.playSongs([song(1), song(2)], 2)
+      await flush()
+      player.removeFromQueue(2)
+      await flush()
+      expect(player.currentId).toBe(1)
+    })
+
+    it('暂停状态下移除当前歌曲只切换，不自动播放', async () => {
+      const player = usePlayerStore()
+      player.playSongs([song(1), song(2)])
+      await flush()
+      player.pause()
+      player.removeFromQueue(1)
+      expect(player.currentId).toBe(2)
+      expect(player.status).toBe(PlayStatus.Paused)
+      expect(engine.stop).toHaveBeenCalled()
+      expect(api.fetchSongUrl).toHaveBeenCalledTimes(1)
+    })
+
+    it('移除唯一一首后进入 idle', async () => {
+      const player = usePlayerStore()
+      player.playSongs([song(1)])
+      await flush()
+      player.removeFromQueue(1)
+      expect(player.queue).toEqual([])
+      expect(player.currentId).toBeNull()
+      expect(player.status).toBe(PlayStatus.Idle)
+    })
+
+    it('清空队列后停止播放', async () => {
+      const player = usePlayerStore()
+      player.playSongs([song(1), song(2)])
+      await flush()
+      player.clearQueue()
+      expect(player.queue).toEqual([])
+      expect(player.currentSong).toBeNull()
+      expect(player.status).toBe(PlayStatus.Idle)
+      expect(engine.stop).toHaveBeenCalled()
+    })
+
+    it('下一首播放：插到当前歌曲之后并去重', async () => {
+      const player = usePlayerStore()
+      player.playSongs([song(1), song(2), song(3), song(4)], 2)
+      await flush()
+      player.insertNext([song(4), song(5), song(2)])
+      expect(player.queue.map((s) => s.id)).toEqual([1, 2, 4, 5, 3])
+      player.next()
+      expect(player.currentId).toBe(4)
+    })
+
+    it('下一首播放在随机模式下同样生效', async () => {
+      const player = usePlayerStore()
+      player.setMode(PlayMode.Shuffle)
+      player.playSongs([song(1), song(2), song(3), song(4)], 1)
+      await flush()
+      player.insertNext([song(9)])
+      player.next()
+      expect(player.currentId).toBe(9)
+    })
+
+    it('没有当前歌曲时下一首播放会直接开始播放', async () => {
+      const player = usePlayerStore()
+      player.insertNext([song(7)])
+      await flush()
+      expect(player.currentId).toBe(7)
+      expect(player.status).toBe(PlayStatus.Playing)
+    })
+  })
 })
