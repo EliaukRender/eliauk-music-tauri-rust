@@ -21,7 +21,7 @@ function play() {
 <template>
   <div
     class="group flex h-16 items-center gap-3 rounded-lg px-2 hover:bg-black/4 dark:hover:bg-white/6"
-    :class="{ 'opacity-40': song.unavailable }"
+    :class="{ 'opacity-40': !player.isPlayable(song) }"
     @dblclick="play"
     @contextmenu="songMenu.open($event, song, songs)"
   >

@@ -38,6 +38,7 @@ const { engine, api, emit, listeners } = vi.hoisted(() => {
       trial: null,
     })),
     fetchSongDetail: vi.fn(async (): Promise<Song[]> => []),
+    fetchUnblockedUrl: vi.fn(async (): Promise<string | null> => null),
   }
   const emit = (type: string) => listeners.get(type)?.forEach((fn) => fn())
   return { engine, api, emit, listeners }
@@ -50,6 +51,7 @@ vi.mock('@/services/notify', () => ({
 }))
 
 const { usePlayerStore } = await import('./player')
+const { useSettingsStore } = await import('./settings')
 
 function song(id: number, partial: Partial<Song> = {}): Song {
   return {
@@ -327,6 +329,53 @@ describe('stores/player', () => {
       await flush()
       expect(player.currentId).toBe(7)
       expect(player.status).toBe(PlayStatus.Playing)
+    })
+  })
+
+  describe('解灰', () => {
+    it('关闭时无版权歌曲不进入队列', async () => {
+      const player = usePlayerStore()
+      player.playSongs([song(1, { unavailable: true }), song(2)])
+      await flush()
+      expect(player.queue.map((s) => s.id)).toEqual([2])
+      expect(api.fetchUnblockedUrl).not.toHaveBeenCalled()
+    })
+
+    it('开启后拿不到正常地址时从第三方音源匹配', async () => {
+      useSettingsStore().unblockEnabled = true
+      api.fetchSongUrl.mockResolvedValueOnce({
+        id: 1,
+        url: null,
+        trial: null,
+      })
+      api.fetchUnblockedUrl.mockResolvedValueOnce('https://third.party/1.mp3')
+      const player = usePlayerStore()
+      player.playSongs([song(1, { unavailable: true }), song(2)])
+      await flush()
+      expect(player.queue.map((s) => s.id)).toEqual([1, 2])
+      expect(engine.load).toHaveBeenCalledWith('https://third.party/1.mp3', 0)
+      expect(player.unblocked).toBe(true)
+      expect(player.status).toBe(PlayStatus.Playing)
+    })
+
+    it('开启后正常地址可用时不走解灰', async () => {
+      useSettingsStore().unblockEnabled = true
+      const player = usePlayerStore()
+      player.playSongs([song(1)])
+      await flush()
+      expect(api.fetchUnblockedUrl).not.toHaveBeenCalled()
+      expect(player.unblocked).toBe(false)
+    })
+
+    it('解灰也失败时跳到下一首', async () => {
+      useSettingsStore().unblockEnabled = true
+      api.fetchSongUrl.mockResolvedValueOnce({ id: 1, url: null, trial: null })
+      const player = usePlayerStore()
+      player.playSongs([song(1, { unavailable: true }), song(2)])
+      await flush()
+      await flush()
+      expect(player.currentId).toBe(2)
+      expect(player.unblocked).toBe(false)
     })
   })
 })

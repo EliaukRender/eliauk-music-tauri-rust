@@ -13,12 +13,20 @@ export const useSettingsStore = defineStore(
     /** 默认关闭，避免与其他软件冲突 */
     const globalShortcutsEnabled = ref(false)
     const globalShortcuts = ref<Record<GlobalAction, string>>({ ...defaultGlobalShortcuts })
+    /** 无版权歌曲尝试从第三方音源匹配（解灰），涉及合规风险，默认关闭 */
+    const unblockEnabled = ref(false)
 
     function resetGlobalShortcuts() {
       globalShortcuts.value = { ...defaultGlobalShortcuts }
     }
 
-    return { closeBehavior, globalShortcutsEnabled, globalShortcuts, resetGlobalShortcuts }
+    return {
+      closeBehavior,
+      globalShortcutsEnabled,
+      globalShortcuts,
+      unblockEnabled,
+      resetGlobalShortcuts,
+    }
   },
   { persist: true },
 )

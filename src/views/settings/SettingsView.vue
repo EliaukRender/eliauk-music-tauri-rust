@@ -20,7 +20,8 @@ import { currentPlatform, isDesktop, usesCommandKey } from '@/utils/platform'
 const message = useMessage()
 const { themeMode } = storeToRefs(useAppStore())
 const settings = useSettingsStore()
-const { closeBehavior, globalShortcutsEnabled, globalShortcuts } = storeToRefs(settings)
+const { closeBehavior, globalShortcutsEnabled, globalShortcuts, unblockEnabled } =
+  storeToRefs(settings)
 const globalActions = Object.keys(globalActionLabels) as GlobalAction[]
 const { level } = storeToRefs(usePlayerStore())
 const user = useUserStore()
@@ -107,6 +108,14 @@ async function testConnection() {
         <div class="flex items-center gap-3">
           <n-select v-model:value="level" :options="levelOptions" class="w-40!" />
           <span class="text-xs text-muted">实际音质受账号权限和歌曲版本限制，接口会自动降级</span>
+        </div>
+      </n-form-item>
+      <n-form-item label="解灰" label-placement="left" :show-feedback="false" class="mt-3">
+        <div class="flex items-center gap-3">
+          <n-switch v-model:value="unblockEnabled" />
+          <span class="text-xs text-muted">
+            无版权歌曲尝试从第三方音源匹配播放。音源不受本应用控制，可能存在版权风险，请自行判断；第三方音源的歌曲没有频谱
+          </span>
         </div>
       </n-form-item>
     </n-card>

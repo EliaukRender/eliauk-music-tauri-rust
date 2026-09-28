@@ -3,6 +3,8 @@ import type { Song } from '@/types/music'
 
 export type SongMenuContext = {
   song: Song
+  /** 有版权，或开启了解灰 */
+  playable: boolean
   loggedIn: boolean
   liked: boolean
   /** 可添加的歌单（自己创建、不含「我喜欢的音乐」） */
@@ -23,7 +25,7 @@ export type SongMenuHandlers = {
 }
 
 export function buildSongMenu(ctx: SongMenuContext, h: SongMenuHandlers): MenuAction[] {
-  const playable = !ctx.song.unavailable
+  const { playable } = ctx
   const items: MenuAction[] = [
     { type: 'item', id: 'play', label: '播放', enabled: playable, action: h.play },
     { type: 'item', id: 'play-next', label: '下一首播放', enabled: playable, action: h.playNext },

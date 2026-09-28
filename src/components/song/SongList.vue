@@ -54,10 +54,16 @@ function play(song: Song) {
       class="song-row grid h-10 cursor-default grid-cols-[48px_20px_minmax(0,5fr)_minmax(0,3fr)_minmax(0,3fr)_56px] items-center gap-3 rounded-lg px-3 hover:bg-black/4 dark:hover:bg-white/6"
       :class="{
         'text-primary': song.id === currentId,
-        'opacity-40': song.unavailable,
+        'opacity-40': !player.isPlayable(song),
         'odd:bg-black/2 dark:odd:bg-white/2': song.id !== currentId,
       }"
-      :title="song.unavailable ? '暂无版权' : undefined"
+      :title="
+        song.unavailable
+          ? player.isPlayable(song)
+            ? '暂无版权，将尝试其他音源'
+            : '暂无版权'
+          : undefined
+      "
       @dblclick="play(song)"
       @contextmenu="songMenu.open($event, song, songs, playlistId)"
     >

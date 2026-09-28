@@ -2,7 +2,7 @@ import { useThrottleFn } from '@vueuse/core'
 import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
 
-import { fetchSongDetail, fetchSongUrl } from '@/api/modules/song'
+import { fetchSongDetail, fetchSongUrl, fetchUnblockedUrl } from '@/api/modules/song'
 import { PlayMode, PlayStatus, SEEK_STEP, SoundLevel } from '@/constants/player'
 import { notify } from '@/services/notify'
 import { audioEngine } from '@/services/player/audio-engine'
@@ -13,6 +13,8 @@ import {
   type PickResult,
 } from '@/services/player/play-mode'
 import type { Song, SongUrl } from '@/types/music'
+
+import { useSettingsStore } from './settings'
 
 /** 网易云音频地址约 20 分钟过期，提前刷新 */
 const URL_TTL = 15 * 60 * 1000
@@ -35,6 +37,8 @@ export const usePlayerStore = defineStore(
     const mode = ref<PlayMode>(PlayMode.Sequence)
     const level = ref<SoundLevel>(SoundLevel.ExHigh)
     const trial = ref<SongUrl['trial']>(null)
+    /** 当前歌曲来自第三方音源（解灰） */
+    const unblocked = ref(false)
     /** 低频写入，用于冷启动恢复进度 */
     const lastPosition = ref(0)
     const shuffleOrder = ref<number[]>([])
@@ -44,6 +48,12 @@ export const usePlayerStore = defineStore(
     const currentIndex = computed(() => queue.value.findIndex((s) => s.id === currentId.value))
     const currentSong = computed(() => queue.value[currentIndex.value] ?? null)
     const isPlaying = computed(() => status.value === PlayStatus.Playing)
+
+    const settings = useSettingsStore()
+    /** 开启解灰后，无版权歌曲也进入队列，播放时再尝试匹配 */
+    function isPlayable(song: Song) {
+      return !song.unavailable || settings.unblockEnabled
+    }
 
     // 切歌竞态：每次加载自增，异步步骤返回后比对，过期即丢弃
     let requestSeq = 0
@@ -58,6 +68,7 @@ export const usePlayerStore = defineStore(
       currentId.value = id
       status.value = PlayStatus.Loading
       trial.value = null
+      unblocked.value = false
       duration.value = (song?.duration ?? 0) / 1000
       lastPosition.value = startAt
       audioEngine.pause()
@@ -65,13 +76,19 @@ export const usePlayerStore = defineStore(
       try {
         const result = await fetchSongUrl(id, level.value)
         if (seq !== requestSeq) return
-        if (!result.url) {
+        let url = result.url
+        if (!url && settings.unblockEnabled) {
+          url = await fetchUnblockedUrl(id)
+          if (seq !== requestSeq) return
+          unblocked.value = !!url
+        }
+        if (!url) {
           skipUnavailable(song)
           return
         }
-        trial.value = result.trial
+        trial.value = unblocked.value ? null : result.trial
         urlFetchedAt = Date.now()
-        audioEngine.load(result.url, startAt)
+        audioEngine.load(url, startAt)
         if (!autoplay) {
           status.value = PlayStatus.Paused
           return
@@ -108,7 +125,8 @@ export const usePlayerStore = defineStore(
         notify.warning('队列中没有可播放的歌曲')
         return
       }
-      notify.warning(`《${song?.name ?? currentId.value}》暂无版权，已跳过`)
+      const reason = settings.unblockEnabled ? '暂无版权且未匹配到其他音源' : '暂无版权'
+      notify.warning(`《${song?.name ?? currentId.value}》${reason}，已跳过`)
       playPicked(pick(true))
     }
 
@@ -143,13 +161,13 @@ export const usePlayerStore = defineStore(
 
     /** 替换整个队列并播放；显式传入队列，避免浏览其他歌单时队列被覆盖 */
     function playSongs(songs: Song[], startId?: number) {
-      const list = songs.filter((s) => !s.unavailable)
+      const list = songs.filter(isPlayable)
       if (!list.length) {
         notify.warning('没有可播放的歌曲')
         return
       }
       if (startId !== undefined && !list.some((s) => s.id === startId)) {
-        notify.warning('该歌曲暂无版权')
+        notify.warning('该歌曲暂无版权，可在设置中开启解灰')
         return
       }
       const ids = list.map((s) => s.id)
@@ -164,8 +182,8 @@ export const usePlayerStore = defineStore(
 
     /** 队列中已有则跳过去，没有则插到当前歌曲之后 */
     function playSong(song: Song) {
-      if (song.unavailable) {
-        notify.warning('该歌曲暂无版权')
+      if (!isPlayable(song)) {
+        notify.warning('该歌曲暂无版权，可在设置中开启解灰')
         return
       }
       if (!queue.value.some((s) => s.id === song.id)) {
@@ -209,7 +227,7 @@ export const usePlayerStore = defineStore(
 
     /** 插到当前歌曲之后，已在队列中的会被移动过来；没有当前歌曲时直接播放 */
     function insertNext(songs: Song[]) {
-      const list = songs.filter((s) => !s.unavailable && s.id !== currentId.value)
+      const list = songs.filter((s) => isPlayable(s) && s.id !== currentId.value)
       if (!list.length) return
       if (!currentSong.value) {
         playSongs(list)
@@ -257,6 +275,7 @@ export const usePlayerStore = defineStore(
       audioEngine.stop()
       status.value = PlayStatus.Idle
       trial.value = null
+      unblocked.value = false
       duration.value = 0
       lastPosition.value = 0
     }
@@ -325,7 +344,7 @@ export const usePlayerStore = defineStore(
       try {
         const songs = await fetchSongDetail(ids)
         if (queue.value.length) return
-        queue.value = songs.filter((s) => !s.unavailable)
+        queue.value = songs.filter(isPlayable)
         pendingQueueIds.value = []
         if (!queue.value.some((s) => s.id === currentId.value)) {
           currentId.value = queue.value[0]?.id ?? null
@@ -398,6 +417,7 @@ export const usePlayerStore = defineStore(
       mode,
       level,
       trial,
+      unblocked,
       lastPosition,
       shuffleOrder,
       pendingQueueIds,
@@ -423,6 +443,7 @@ export const usePlayerStore = defineStore(
       setMode,
       cycleMode,
       restore,
+      isPlayable,
     }
   },
   {

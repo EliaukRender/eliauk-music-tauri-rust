@@ -22,7 +22,8 @@ export type RawPrivilege = { id: number; st: number }
 export type RawSongUrl = {
   id: number
   url: string | null
-  freeTrialInfo: { start: number; end: number } | null
+  /** 解灰结果中为字符串 'null' */
+  freeTrialInfo: { start: number; end: number } | string | null
 }
 
 /**
@@ -59,7 +60,7 @@ export function normalizeSongs(songs: RawSong[], privileges: RawPrivilege[] = []
 }
 
 export function normalizeSongUrl(raw: RawSongUrl): SongUrl {
-  const trial = raw.freeTrialInfo
+  const trial = typeof raw.freeTrialInfo === 'object' ? raw.freeTrialInfo : null
   return {
     id: raw.id,
     url: toHttps(raw.url),

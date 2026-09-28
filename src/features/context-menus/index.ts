@@ -36,6 +36,7 @@ export function useSongMenu() {
     const items = buildSongMenu(
       {
         song,
+        playable: player.isPlayable(song),
         loggedIn: user.isLoggedIn,
         liked: like.isLiked(song.id),
         playlists: playlist.created,

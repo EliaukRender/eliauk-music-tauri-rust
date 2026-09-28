@@ -31,7 +31,15 @@ function handlers(): SongMenuHandlers {
 }
 
 function ctx(partial: Partial<SongMenuContext> = {}): SongMenuContext {
-  return { song, loggedIn: true, liked: false, playlists: [], removableFrom: null, ...partial }
+  return {
+    song,
+    playable: true,
+    loggedIn: true,
+    liked: false,
+    playlists: [],
+    removableFrom: null,
+    ...partial,
+  }
 }
 
 const ids = (items: MenuAction[]) => items.flatMap((i) => (i.type === 'separator' ? [] : [i.id]))
@@ -68,11 +76,8 @@ describe('context-menus', () => {
     expect(h.removeFromPlaylist).toHaveBeenCalledWith(9)
   })
 
-  it('歌曲菜单：喜欢状态决定文案，无版权歌曲禁用播放', () => {
-    const items = buildSongMenu(
-      ctx({ liked: true, song: { ...song, unavailable: true } }),
-      handlers(),
-    )
+  it('歌曲菜单：喜欢状态决定文案，不可播放时禁用播放', () => {
+    const items = buildSongMenu(ctx({ liked: true, playable: false }), handlers())
     expect(find(items, 'like')).toMatchObject({ label: '取消喜欢' })
     expect(find(items, 'play')).toMatchObject({ enabled: false })
     expect(find(items, 'play-next')).toMatchObject({ enabled: false })

@@ -63,6 +63,7 @@ describe('api/adapters/song', () => {
     expect(
       normalizeSongUrl({ id: 1, url: 'http://a/b.mp3', freeTrialInfo: { start: 6, end: 44 } }),
     ).toEqual({ id: 1, url: 'https://a/b.mp3', trial: { start: 6, end: 44 } })
+    expect(normalizeSongUrl({ id: 1, url: 'https://a', freeTrialInfo: 'null' }).trial).toBeNull()
     expect(normalizeSongUrl({ id: 1, url: null, freeTrialInfo: null })).toEqual({
       id: 1,
       url: null,

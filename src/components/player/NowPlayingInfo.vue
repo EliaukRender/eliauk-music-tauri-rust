@@ -7,7 +7,7 @@ import { joinArtists, resizeImage } from '@/utils/format'
 
 import LikeButton from './LikeButton.vue'
 
-const { currentSong, trial } = storeToRefs(usePlayerStore())
+const { currentSong, trial, unblocked } = storeToRefs(usePlayerStore())
 const { visible: lyricVisible } = storeToRefs(useLyricStore())
 </script>
 
@@ -40,6 +40,16 @@ const { visible: lyricVisible } = storeToRefs(useLyricStore())
         <span class="truncate">{{ currentSong?.name ?? '暂无播放' }}</span>
         <n-tag v-if="trial" size="tiny" type="warning" :bordered="false" class="shrink-0">
           试听
+        </n-tag>
+        <n-tag
+          v-if="unblocked"
+          size="tiny"
+          type="info"
+          :bordered="false"
+          class="shrink-0"
+          title="来自第三方音源，频谱不可用"
+        >
+          第三方音源
         </n-tag>
         <LikeButton v-if="currentSong" :song-id="currentSong.id" class="ml-1 text-base" />
       </p>
