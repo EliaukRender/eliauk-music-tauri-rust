@@ -4,10 +4,12 @@ import { storeToRefs } from 'pinia'
 import WindowControls from '@/components/layout/WindowControls.vue'
 import LikeButton from '@/components/player/LikeButton.vue'
 import SpectrumCanvas from '@/components/spectrum/SpectrumCanvas.vue'
+import { RING_CANVAS_SCALE, SpectrumMode } from '@/constants/spectrum'
 import { toggleFullscreen } from '@/services/tauri/window'
 import { useAppStore } from '@/stores/app'
 import { LyricStatus, useLyricStore } from '@/stores/lyric'
 import { usePlayerStore } from '@/stores/player'
+import { useSpectrumStore } from '@/stores/spectrum'
 import { joinArtists } from '@/utils/format'
 import { isDesktop, isMacOS } from '@/utils/platform'
 
@@ -20,6 +22,15 @@ const lyric = useLyricStore()
 const { visible, lines, status, offset, showTrans, showRoma } = storeToRefs(lyric)
 const { currentSong, isPlaying } = storeToRefs(usePlayerStore())
 const { isFullscreen } = storeToRefs(useAppStore())
+const { mode: spectrumMode } = storeToRefs(useSpectrumStore())
+
+/** 环形频谱画布以唱片为中心放大，比例与 ring painter 推算唱片半径时一致；canvas 不随 inset 拉伸，需显式给宽高 */
+const ringStyle = {
+  left: `${(-(RING_CANVAS_SCALE - 1) / 2) * 100}%`,
+  top: `${(-(RING_CANVAS_SCALE - 1) / 2) * 100}%`,
+  width: `${RING_CANVAS_SCALE * 100}%`,
+  height: `${RING_CANVAS_SCALE * 100}%`,
+}
 
 const statusText: Partial<Record<LyricStatus, string>> = {
   [LyricStatus.Loading]: '歌词加载中…',
@@ -37,7 +48,10 @@ const statusText: Partial<Record<LyricStatus, string>> = {
       class="dark absolute inset-x-0 top-0 bottom-[72px] z-30 flex flex-col overflow-hidden text-white"
     >
       <LyricBackground :cover="currentSong?.album.picUrl ?? ''" />
-      <SpectrumCanvas class="absolute! inset-x-0 bottom-0 h-28! opacity-60" />
+      <SpectrumCanvas
+        v-if="spectrumMode !== SpectrumMode.Ring"
+        class="absolute! inset-x-0 bottom-0 h-28! opacity-60"
+      />
 
       <header
         data-tauri-drag-region
@@ -68,7 +82,12 @@ const statusText: Partial<Record<LyricStatus, string>> = {
         class="relative grid min-h-0 flex-1 grid-cols-[minmax(0,5fr)_minmax(0,6fr)] items-center gap-16 px-16 pb-8"
       >
         <div class="flex flex-col items-center gap-8">
-          <div class="w-[min(360px,80%)]">
+          <div class="relative w-[min(360px,80%)]">
+            <SpectrumCanvas
+              v-if="spectrumMode === SpectrumMode.Ring"
+              class="absolute! opacity-80"
+              :style="ringStyle"
+            />
             <JukeBox :cover="currentSong?.album.picUrl ?? ''" :playing="isPlaying" />
           </div>
           <div v-if="currentSong" class="w-full max-w-[420px] text-center">

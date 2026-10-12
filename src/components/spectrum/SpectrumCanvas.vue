@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useDocumentVisibility, useResizeObserver } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
-import { onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue'
 
+import { useCoverPalette } from '@/composables/useCoverPalette'
 import { SpectrumMode } from '@/constants/spectrum'
 import { audioEngine } from '@/services/player/audio-engine'
 import { createSpectrumRenderer } from '@/services/spectrum/renderer'
@@ -10,9 +11,14 @@ import { usePlayerStore } from '@/stores/player'
 import { useSpectrumStore } from '@/stores/spectrum'
 
 const canvasRef = useTemplateRef<HTMLCanvasElement>('canvas')
-const { options, mode } = storeToRefs(useSpectrumStore())
-const { isPlaying } = storeToRefs(usePlayerStore())
+const { options, mode, followCover } = storeToRefs(useSpectrumStore())
+const { isPlaying, unblocked } = storeToRefs(usePlayerStore())
 const visibility = useDocumentVisibility()
+const coverPalette = useCoverPalette(followCover)
+
+const renderOptions = computed(() =>
+  coverPalette.value ? { ...options.value, colors: coverPalette.value } : options.value,
+)
 
 let renderer: ReturnType<typeof createSpectrumRenderer> | null = null
 
@@ -20,28 +26,29 @@ onMounted(() => {
   renderer = createSpectrumRenderer(
     canvasRef.value!,
     () => audioEngine.getAnalyser(),
-    options.value,
+    renderOptions.value,
   )
   renderer.resize()
 })
-onBeforeUnmount(() => renderer?.stop())
+onBeforeUnmount(() => renderer?.halt())
 
 useResizeObserver(canvasRef, () => renderer?.resize())
 
-watch(options, (value) => renderer?.update(value))
+watch(renderOptions, (value) => renderer?.update(value))
 
-// 暂停、页面不可见或关闭频谱时停止 rAF，CPU 占用回落
+// 暂停或切到第三方音源（没有 analyser）时让柱子落回底部再停 rAF；页面不可见或关闭频谱时立即停止
 watch(
-  [isPlaying, visibility, mode],
-  ([playing, visible, currentMode]) => {
+  [isPlaying, unblocked, visibility, mode],
+  ([playing, thirdParty, visible, currentMode]) => {
     if (!renderer) return
-    if (playing && visible === 'visible' && currentMode !== SpectrumMode.None) renderer.start()
+    if (visible !== 'visible' || currentMode === SpectrumMode.None) renderer.halt()
+    else if (playing && !thirdParty) renderer.start()
     else renderer.stop()
   },
   { flush: 'post' },
 )
 onMounted(() => {
-  if (isPlaying.value && mode.value !== SpectrumMode.None) renderer?.start()
+  if (isPlaying.value && !unblocked.value && mode.value !== SpectrumMode.None) renderer?.start()
 })
 </script>
 

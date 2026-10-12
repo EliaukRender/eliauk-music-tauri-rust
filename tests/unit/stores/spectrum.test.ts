@@ -1,16 +1,12 @@
 import { createPinia, setActivePinia } from 'pinia'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { nextTick } from 'vue'
+import { beforeEach, describe, expect, it } from 'vitest'
 
-const { engine } = vi.hoisted(() => ({ engine: { setFftSize: vi.fn() } }))
-vi.mock('@/services/player/audio-engine', () => ({ audioEngine: engine }))
-
-const { useSpectrumStore } = await import('@/stores/spectrum')
+import { SpectrumLayout } from '@/constants/spectrum'
+import { useSpectrumStore } from '@/stores/spectrum'
 
 describe('stores/spectrum', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
-    vi.clearAllMocks()
   })
 
   it('选择预设后自定义颜色会清除预设标记', () => {
@@ -23,11 +19,28 @@ describe('stores/spectrum', () => {
     expect(store.colors).toEqual(['#000000', '#ffa5c3', '#ffdcd1', '#ffbfbe'])
   })
 
-  it('fftSize 变化时下发到音频引擎', async () => {
+  it('手动选择配色会关闭跟随封面', () => {
     const store = useSpectrumStore()
-    expect(engine.setFftSize).toHaveBeenCalledWith(256)
-    store.fftSize = 1024
-    await nextTick()
-    expect(engine.setFftSize).toHaveBeenLastCalledWith(1024)
+    store.followCover = true
+    store.applyPreset('2')
+    expect(store.followCover).toBe(false)
+    store.followCover = true
+    store.setColor(1, '#ffffff')
+    expect(store.followCover).toBe(false)
+  })
+
+  it('各项设置同步到渲染配置，峰值帽默认开启', () => {
+    const store = useSpectrumStore()
+    expect(store.options.peakCaps).toBe(true)
+    store.peakCaps = false
+    store.layout = SpectrumLayout.Linear
+    store.barCount = 48
+    store.sensitivity = 5
+    expect(store.options).toMatchObject({
+      peakCaps: false,
+      layout: SpectrumLayout.Linear,
+      barCount: 48,
+      sensitivity: 5,
+    })
   })
 })

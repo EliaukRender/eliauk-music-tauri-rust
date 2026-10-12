@@ -1,4 +1,4 @@
-import { DEFAULT_FFT_SIZE } from '@/constants/spectrum'
+import { SPECTRUM_FFT_SIZE } from '@/constants/spectrum'
 import { logger } from '@/services/logger'
 
 type MediaEvent = keyof HTMLMediaElementEventMap
@@ -6,6 +6,7 @@ type MediaEvent = keyof HTMLMediaElementEventMap
 /** 开始播放后等待多久采样频谱，用于判断是否因 CORS 被静音 */
 const SILENCE_CHECK_DELAY = 1500
 const SILENCE_CHECK_FRAMES = 5
+const ANALYSER_SMOOTHING = 0.5
 
 /** 已确认返回 CORS 头的网易云音频 CDN */
 const CORS_SAFE_HOST_RE = /(^|\.)music\.126\.net$/
@@ -43,7 +44,6 @@ class AudioEngine {
   private muted = false
   /** 元数据就绪前设置 currentTime 在 WebKit 上不可靠，延后到 loadedmetadata */
   private pendingStart = 0
-  private fftSize: number = DEFAULT_FFT_SIZE
   /** 已判定过的 CDN 域名，每个域名只检测一次 */
   private checkedHosts = new Set<string>()
 
@@ -146,11 +146,6 @@ class AudioEngine {
     return this.active === this.graphAudio ? this.analyser : null
   }
 
-  setFftSize(size: number) {
-    this.fftSize = size
-    if (this.analyser) this.analyser.fftSize = size
-  }
-
   private clear(audio: HTMLAudioElement) {
     audio.pause()
     audio.removeAttribute('src')
@@ -207,7 +202,9 @@ class AudioEngine {
       const context = new AudioContext()
       const source = context.createMediaElementSource(this.graphAudio)
       const analyser = context.createAnalyser()
-      analyser.fftSize = this.fftSize
+      analyser.fftSize = SPECTRUM_FFT_SIZE
+      // 默认 0.8 会抹平鼓点；下落的平滑交给 spectrum/dynamics 按帧间隔处理
+      analyser.smoothingTimeConstant = ANALYSER_SMOOTHING
       const gain = context.createGain()
       source.connect(analyser)
       analyser.connect(gain)
