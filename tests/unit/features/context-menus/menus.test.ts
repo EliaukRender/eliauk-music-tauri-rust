@@ -93,6 +93,8 @@ describe('context-menus', () => {
   })
 
   it('队列菜单', () => {
-    expect(ids(buildQueueMenu({ play: vi.fn(), remove: vi.fn() }))).toEqual(['play', 'remove'])
+    const h = { play: vi.fn(), playNext: vi.fn(), remove: vi.fn() }
+    expect(ids(buildQueueMenu(false, h))).toEqual(['play', 'play-next', 'remove'])
+    expect(ids(buildQueueMenu(true, h))).toEqual(['play', 'remove'])
   })
 })

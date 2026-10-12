@@ -11,6 +11,7 @@ import LoginModal from '@/components/user/LoginModal.vue'
 import { useGlobalShortcutsSync } from '@/composables/app/useGlobalShortcutsSync'
 import { useHotkeys } from '@/composables/app/useHotkeys'
 import { useMiniBridge } from '@/composables/app/useMiniBridge'
+import { usePlayHistory } from '@/composables/app/usePlayHistory'
 import { useScrollRestore } from '@/composables/app/useScrollRestore'
 import { useSystemBridge } from '@/composables/app/useSystemBridge'
 import { useWindowState } from '@/composables/app/useWindowState'
@@ -24,6 +25,7 @@ useHotkeys()
 useSystemBridge()
 useGlobalShortcutsSync()
 useMiniBridge()
+usePlayHistory()
 
 /** 列表类页面切换时保留状态，避免重复请求（组件需要声明 name） */
 const KEEP_ALIVE_VIEWS = ['DiscoverView', 'ToplistView', 'ArtistsView']

@@ -118,8 +118,9 @@ export function useQueueMenu() {
   function open(event: MouseEvent, song: Song) {
     showContextMenu(
       event,
-      buildQueueMenu({
+      buildQueueMenu(song.id === player.currentId, {
         play: () => player.playSong(song),
+        playNext: () => player.insertNext([song]),
         remove: () => player.removeFromQueue(song.id),
       }),
     )

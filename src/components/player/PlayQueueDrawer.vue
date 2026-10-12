@@ -1,32 +1,33 @@
 <script setup lang="ts">
-import type { VirtualListInst } from 'naive-ui'
 import { storeToRefs } from 'pinia'
-import { useTemplateRef } from 'vue'
+import { ref, useTemplateRef } from 'vue'
 
 import { CONTENT_OVERLAY_ID } from '@/constants/layout'
-import { useQueueMenu } from '@/features/context-menus'
 import { useAppStore } from '@/stores/app'
+import { useHistoryStore } from '@/stores/history'
 import { usePlayerStore } from '@/stores/player'
 
-import QueueItem from './QueueItem.vue'
+import HistoryList from './HistoryList.vue'
+import QueueList from './QueueList.vue'
 
-const ITEM_HEIGHT = 56
+type Tab = 'queue' | 'history'
 
 const { queueDrawerVisible } = storeToRefs(useAppStore())
 const player = usePlayerStore()
-const { queue, currentId, currentIndex, isPlaying } = storeToRefs(player)
+const history = useHistoryStore()
+const { queue } = storeToRefs(player)
+const { entries } = storeToRefs(history)
 
-const queueMenu = useQueueMenu()
+const tab = ref<Tab>('queue')
+const queueListRef = useTemplateRef<InstanceType<typeof QueueList>>('queueList')
 
-const listRef = useTemplateRef<VirtualListInst>('list')
-const wrapperRef = useTemplateRef<HTMLElement>('wrapper')
+function onAfterEnter() {
+  if (tab.value === 'queue') queueListRef.value?.scrollToCurrent()
+}
 
-/** vueuc 的 scrollTo 不支持居中，按行高自行计算 */
-function scrollToCurrent() {
-  if (currentIndex.value < 0) return
-  const viewport = wrapperRef.value?.clientHeight ?? 0
-  const top = currentIndex.value * ITEM_HEIGHT - (viewport - ITEM_HEIGHT) / 2
-  listRef.value?.scrollTo({ top: Math.max(top, 0) })
+/** 每次打开都回到播放队列，与快捷键、mini 窗口「打开队列」的语义一致 */
+function onAfterLeave() {
+  tab.value = 'queue'
 }
 </script>
 
@@ -38,16 +39,28 @@ function scrollToCurrent() {
     placement="right"
     show-mask="transparent"
     :auto-focus="false"
-    @after-enter="scrollToCurrent"
+    @after-enter="onAfterEnter"
+    @after-leave="onAfterLeave"
   >
     <n-drawer-content :body-content-style="{ padding: 0, height: '100%' }">
       <template #header>
         <div class="flex w-full items-center justify-between">
-          <span>
-            播放队列
-            <span class="ml-1 text-sm font-normal text-muted">{{ queue.length }}</span>
-          </span>
+          <div class="flex items-baseline gap-4">
+            <button
+              v-for="item in [
+                { key: 'queue', label: '播放队列', count: queue.length },
+                { key: 'history', label: '最近播放', count: entries.length },
+              ] as const"
+              :key="item.key"
+              :class="tab === item.key ? 'text-fg' : 'text-muted font-normal hover:text-fg'"
+              @click="tab = item.key"
+            >
+              {{ item.label }}
+              <span class="ml-0.5 text-sm font-normal text-muted">{{ item.count }}</span>
+            </button>
+          </div>
           <n-button
+            v-if="tab === 'queue'"
             text
             size="small"
             :disabled="!queue.length"
@@ -57,35 +70,20 @@ function scrollToCurrent() {
             <template #icon><i-ri-delete-bin-6-line /></template>
             清空
           </n-button>
+          <n-popconfirm v-else :show-icon="false" @positive-click="history.clear()">
+            <template #trigger>
+              <n-button text size="small" :disabled="!entries.length" class="text-muted!">
+                <template #icon><i-ri-delete-bin-6-line /></template>
+                清空
+              </n-button>
+            </template>
+            清空全部播放记录？
+          </n-popconfirm>
         </div>
       </template>
 
-      <div ref="wrapper" class="h-full">
-        <n-empty v-if="!queue.length" description="队列为空，去发现音乐吧" class="pt-24" />
-        <n-virtual-list
-          v-else
-          ref="list"
-          :items="queue"
-          :item-size="ITEM_HEIGHT"
-          key-field="id"
-          class="h-full"
-          :padding-top="6"
-          :padding-bottom="6"
-        >
-          <template #default="{ item }">
-            <div class="px-2">
-              <QueueItem
-                :song="item"
-                :active="item.id === currentId"
-                :playing="isPlaying"
-                @play="player.playSong(item)"
-                @remove="player.removeFromQueue(item.id)"
-                @contextmenu="queueMenu.open($event, item)"
-              />
-            </div>
-          </template>
-        </n-virtual-list>
-      </div>
+      <QueueList v-if="tab === 'queue'" ref="queueList" />
+      <HistoryList v-else />
     </n-drawer-content>
   </n-drawer>
 </template>

@@ -22,3 +22,20 @@ export function resizeImage(url: string, size: number): string {
   if (!url) return url
   return `${url}${url.includes('?') ? '&' : '?'}param=${size}y${size}`
 }
+
+const pad = (n: number) => String(n).padStart(2, '0')
+
+/** 播放历史的时间：1 分钟内为「刚刚」，1 小时内为「N 分钟前」，之后按今天、昨天、今年、更早显示 */
+export function formatPlayedAt(timestamp: number, now = Date.now()): string {
+  const diff = now - timestamp
+  if (diff < 60_000) return '刚刚'
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)} 分钟前`
+  const date = new Date(timestamp)
+  const today = new Date(now)
+  today.setHours(0, 0, 0, 0)
+  const time = `${pad(date.getHours())}:${pad(date.getMinutes())}`
+  if (timestamp >= today.getTime()) return time
+  if (timestamp >= today.getTime() - 86_400_000) return `昨天 ${time}`
+  const day = `${date.getMonth() + 1}月${date.getDate()}日`
+  return date.getFullYear() === today.getFullYear() ? day : `${date.getFullYear()}年${day}`
+}

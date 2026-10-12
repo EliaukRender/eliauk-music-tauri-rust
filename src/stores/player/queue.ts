@@ -100,6 +100,25 @@ export function createQueueActions(
     shuffleOrder.value = order
   }
 
+  /**
+   * 拖拽排序：把歌曲移到 toIndex（移除自身后的下标）。
+   * 随机模式下同步调整播放顺序，让它紧跟新位置的前一首，拖到当前歌曲下方即为下一首
+   */
+  function moveInQueue(id: number, toIndex: number) {
+    const from = queue.value.findIndex((s) => s.id === id)
+    if (from === -1) return
+    const to = Math.min(Math.max(toIndex, 0), queue.value.length - 1)
+    if (from === to) return
+    const list = [...queue.value]
+    list.splice(to, 0, ...list.splice(from, 1))
+    queue.value = list
+
+    const prevId = list[to - 1]?.id
+    const order = shuffleOrder.value.filter((x) => x !== id)
+    order.splice(prevId === undefined ? 0 : order.indexOf(prevId) + 1, 0, id)
+    shuffleOrder.value = order
+  }
+
   /** 冷启动恢复队列与当前歌曲，不自动播放；失败时保留 id 供下次重试 */
   async function restore() {
     const ids = pendingQueueIds.value
@@ -124,5 +143,5 @@ export function createQueueActions(
     }
   }
 
-  return { playSongs, playSong, removeFromQueue, clearQueue, insertNext, restore }
+  return { playSongs, playSong, removeFromQueue, clearQueue, insertNext, moveInQueue, restore }
 }
