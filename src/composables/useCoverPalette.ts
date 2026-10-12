@@ -1,24 +1,21 @@
-import { type Ref, shallowRef, watch } from 'vue'
+import { type MaybeRefOrGetter, shallowRef, toValue, watch } from 'vue'
 
-import type { SpectrumColors } from '@/constants/spectrum'
-import { extractCoverPalette } from '@/services/spectrum/cover-palette'
-import { usePlayerStore } from '@/stores/player'
+import { type CoverPalette, extractCoverPalette } from '@/services/cover-palette'
 
-/** 当前歌曲封面的配色；enabled 为 false、取色失败或黑白封面时为 null */
-export function useCoverPalette(enabled: Ref<boolean>) {
-  const player = usePlayerStore()
-  const palette = shallowRef<SpectrumColors | null>(null)
+/** 封面配色；cover 为空、取色失败或黑白封面时为 null。传空字符串即可关闭取色 */
+export function useCoverPalette(cover: MaybeRefOrGetter<string>) {
+  const palette = shallowRef<CoverPalette | null>(null)
 
   watch(
-    [enabled, () => player.currentSong?.album.picUrl ?? ''],
-    async ([on, cover], _, onCleanup) => {
+    () => toValue(cover),
+    async (url, _, onCleanup) => {
       let stale = false
       onCleanup(() => (stale = true))
-      if (!on || !cover) {
+      if (!url) {
         palette.value = null
         return
       }
-      const colors = await extractCoverPalette(cover)
+      const colors = await extractCoverPalette(url)
       // 切歌很快时丢弃过期结果
       if (!stale) palette.value = colors
     },

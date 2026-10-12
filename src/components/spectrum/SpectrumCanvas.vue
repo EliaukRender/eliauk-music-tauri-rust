@@ -12,9 +12,12 @@ import { useSpectrumStore } from '@/stores/spectrum'
 
 const canvasRef = useTemplateRef<HTMLCanvasElement>('canvas')
 const { options, mode, followCover } = storeToRefs(useSpectrumStore())
-const { isPlaying, unblocked } = storeToRefs(usePlayerStore())
+const player = usePlayerStore()
+const { isPlaying, unblocked } = storeToRefs(player)
 const visibility = useDocumentVisibility()
-const coverPalette = useCoverPalette(followCover)
+const coverPalette = useCoverPalette(() =>
+  followCover.value ? (player.currentSong?.album.picUrl ?? '') : '',
+)
 
 const renderOptions = computed(() =>
   coverPalette.value ? { ...options.value, colors: coverPalette.value } : options.value,

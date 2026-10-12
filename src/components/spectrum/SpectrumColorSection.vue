@@ -3,11 +3,15 @@ import { storeToRefs } from 'pinia'
 
 import { useCoverPalette } from '@/composables/useCoverPalette'
 import { spectrumPresets } from '@/constants/spectrum'
+import { usePlayerStore } from '@/stores/player'
 import { useSpectrumStore } from '@/stores/spectrum'
 
 const store = useSpectrumStore()
+const player = usePlayerStore()
 const { colors, presetId, followCover } = storeToRefs(store)
-const coverPalette = useCoverPalette(followCover)
+const coverPalette = useCoverPalette(() =>
+  followCover.value ? (player.currentSong?.album.picUrl ?? '') : '',
+)
 </script>
 
 <template>

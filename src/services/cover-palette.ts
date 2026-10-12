@@ -1,4 +1,3 @@
-import type { SpectrumColors } from '@/constants/spectrum'
 import { resizeImage } from '@/utils/format'
 
 const SAMPLE_SIZE = 32
@@ -6,12 +5,14 @@ const HUE_BUCKETS = 12
 /** 低于该饱和度视为灰色，不参与取色 */
 const MIN_SATURATION = 0.15
 const CACHE_LIMIT = 50
-/** 歌词页是深色背景，取出的颜色提亮到该区间以保证可见 */
+/** 频谱与歌词背景都在深色底上，取出的颜色提亮到该区间以保证可见 */
 const MIN_LIGHTNESS = 0.55
 const MAX_LIGHTNESS = 0.8
 const MIN_OUTPUT_SATURATION = 0.45
 /** 彩色像素的平均权重低于该值视为黑白封面 */
 const MIN_COLORFUL_WEIGHT = 0.02
+
+export type CoverPalette = [string, string, string, string]
 
 type Hsl = [h: number, s: number, l: number]
 
@@ -46,7 +47,7 @@ function hslToHex([h, s, l]: Hsl) {
  * 从 RGBA 像素中按色相分桶，取权重最高的 4 个色相作为配色；
  * 权重偏向饱和、中等亮度的像素。几乎没有彩色像素（黑白封面）时返回 null
  */
-export function pickPalette(pixels: Uint8ClampedArray): SpectrumColors | null {
+export function pickPalette(pixels: Uint8ClampedArray): CoverPalette | null {
   const buckets = Array.from({ length: HUE_BUCKETS }, () => ({
     weight: 0,
     cos: 0,
@@ -85,10 +86,10 @@ export function pickPalette(pixels: Uint8ClampedArray): SpectrumColors | null {
     const [h, s, l] = colors[i % base]!
     colors.push([h, s, i % 2 ? Math.min(l + 0.12, 0.9) : Math.max(l - 0.1, 0.45)])
   }
-  return colors.map(hslToHex) as SpectrumColors
+  return colors.map(hslToHex) as CoverPalette
 }
 
-const cache = new Map<string, Promise<SpectrumColors | null>>()
+const cache = new Map<string, Promise<CoverPalette | null>>()
 
 function loadPixels(url: string) {
   return new Promise<Uint8ClampedArray>((resolve, reject) => {
@@ -109,13 +110,13 @@ function loadPixels(url: string) {
 }
 
 /** 提取封面配色，按 URL 缓存；失败或黑白封面返回 null */
-export function extractCoverPalette(url: string): Promise<SpectrumColors | null> {
+export function extractCoverPalette(url: string): Promise<CoverPalette | null> {
   const cached = cache.get(url)
   if (cached) return cached
   const task = loadPixels(url)
     .then(pickPalette)
     .catch((error: unknown) => {
-      console.warn('[spectrum] 封面取色失败', error)
+      console.warn('[cover-palette] 封面取色失败', error)
       cache.delete(url)
       return null
     })

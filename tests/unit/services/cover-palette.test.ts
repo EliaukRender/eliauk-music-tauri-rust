@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { pickPalette } from '@/services/spectrum/cover-palette'
+import { pickPalette } from '@/services/cover-palette'
 
 function pixels(...colors: [number, number, number, number][]) {
   const data: number[] = []
@@ -17,7 +17,7 @@ function hue(hex: string) {
   return 'green'
 }
 
-describe('services/spectrum/cover-palette', () => {
+describe('services/cover-palette', () => {
   it('黑白封面返回 null', () => {
     expect(pickPalette(pixels([20, 20, 20, 500], [230, 230, 230, 500]))).toBeNull()
   })
